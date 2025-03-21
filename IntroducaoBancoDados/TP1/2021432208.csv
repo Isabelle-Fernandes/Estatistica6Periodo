@@ -1,0 +1,16 @@
+Query Number;Row Count;Query
+a1;272;SELECT id_viagem, origem_cidade, destino_cidade FROM trecho WHERE transporte='Rodoviário'
+a2;641;SELECT id_pagamento, valor FROM pagamento WHERE valor>1000
+a3;230;SELECT orgao.nome_orgao, pagamento.valor FROM orgao, pagamento WHERE pagamento.id_orgao_superior=orgao.id_orgao AND pagamento.valor<200
+a4;61;SELECT trecho.id_viagem, trecho.sequencia_trecho, viagem.destino_viagem FROM viagem, trecho WHERE viagem.id_viagem=trecho.id_viagem AND trecho.sequencia_trecho=5
+a5;1124;SELECT id_pagamento, valor FROM pagamento, viagem WHERE pagamento.id_viagem=viagem.id_viagem AND viagem_urgente='SIM'
+q1;12;SELECT id_viagem, situacao, nome_viajante, data_inicio, data_fim, destino_viagem FROM viagem WHERE data_inicio BETWEEN '2022-01-09' and '2022-01-16'
+q2;5;SELECT id_orgao, nome_orgao FROM orgao WHERE nome_orgao LIKE '%Nacional%'
+q3;42;SELECT nome_viajante, cargo_funcao_viajante FROM viagem WHERE nome_viajante LIKE '%SANTOS'
+q4;50;SELECT nome_viajante, valor_passagens FROM viagem, trecho WHERE viagem.id_viagem=trecho.id_viagem AND origem_cidade='São Paulo' ORDER BY valor_passagens ASC, nome_viajante ASC LIMIT 50
+q5;12;SELECT orgao.nome_orgao, count(orgao.nome_orgao) FROM pagamento, viagem, orgao WHERE pagamento.id_viagem=viagem.id_viagem AND pagamento.id_orgao_superior = orgao.id_orgao AND viagem_urgente='SIM' GROUP BY orgao.nome_orgao
+q6;0;SELECT viagem.id_viagem FROM viagem, pagamento WHERE pagamento.id_viagem=viagem.id_viagem AND id_orgao_solicitante=52000
+q7;2;SELECT passagem.id_viagem, count(passagem.id_viagem) FROM passagem GROUP BY passagem.id_viagem HAVING COUNT(passagem.id_viagem)>3
+q8;11;SELECT trecho.id_viagem FROM trecho, viagem WHERE origem_pais<>'Brasil' AND cargo_funcao_viajante LIKE '%MINISTRO%' AND trecho.id_viagem=viagem.id_viagem
+q9;10;SELECT DISTINCT nome_orgao FROM orgao, viagem, pagamento WHERE valor_diarias BETWEEN 0 and 1000 AND pagamento.id_viagem = viagem.id_viagem AND viagem.id_orgao_superior=orgao.id_orgao ORDER BY nome_orgao
+q10;452;SELECT viagem.id_viagem, nome_viajante, sum(valor) as valor_total_pago_viagem FROM viagem, trecho, pagamento WHERE trecho.id_viagem=viagem.id_viagem AND transporte<>'Aéreo' AND transporte<>'Rodoviário' AND viagem_urgente='SIM' AND pagamento.id_viagem=viagem.id_viagem GROUP BY viagem.id_viagem ORDER BY nome_viajante

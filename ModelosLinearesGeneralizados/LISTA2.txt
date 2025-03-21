@@ -1,0 +1,211 @@
+#Lista 2 MLG
+
+#Questão 1
+#letra b)
+
+theta = seq(0,1,0.01)
+
+vero <- function(theta){
+  (theta^5)*(1-theta)^10 
+}
+
+plot(theta, vero(theta))
+
+max(vero(theta))
+
+for (i in 1:length(theta)) {
+  if (vero(theta[i])==max(vero(theta))){
+    parametro = theta[i]
+    break
+  }
+}
+
+parametro
+
+#letra c)
+
+theta = seq(0,1,0.01)
+
+logvero <- function(theta){
+  5*log(theta) + 10*log(1-theta) 
+}
+
+
+
+plot(theta, logvero(theta))
+
+max(logvero(theta))
+
+for (i in 1:length(theta)) {
+  if (logvero(theta[i])==max(logvero(theta))){
+    parametro = theta[i]
+    break
+  }
+}
+
+parametro
+
+#letra d)
+
+y <- c(1,0,0,1,0,0,0,1,0,0,0,1,0,0,1)
+
+loglik = function(theta,y){
+  n = length(y)
+  out = sum(y)*log(theta) + sum(1-y)*log(1-theta)
+  return(out)
+}
+
+grad = function(theta,y){
+  out=(5/theta) + 10/(1-theta)*(-1)
+  return(out)
+}
+
+
+chute <- 0.5
+
+ajuste <- optim(par = chute, fn = loglik, gr = grad, y = y,
+                method = "L-BFGS-B", lower = 0.0001, upper = 0.9999, 
+                control = list(fnscale = -1))
+
+ajuste$par
+
+#Questão 2
+#letra a)
+
+beta <- c(1,1) # p = 2 dois parametros estimados
+y <- c(7,2,24,33,2,5,2,5,8,8,16,20,11,4,37,1,8,8,5,7,5,4,4,2,26)
+x <- matrix(c(rep(1,25),-0.27,0.57,-0.74,-0.94,0.64,0.86,0.5,0.12,-0.36,0.12,-0.55,-0.81,
+              -0.21,0.53,-1,0.4,-0.07,0.15,-0.13,0.22,0.96,0.45,-0.06,0.97,-0.71),nrow = 25, byrow = F)
+
+W <- matrix(rep(0,25*25), nrow = 25)
+
+for (i in 1:25) {
+  n <- x[i,]%*%beta
+  W[i,i] <- exp(n)
+}
+
+W[1:5,1:5]
+
+#letra b)
+
+z <- rep(0,25)
+
+for (i in 1:25) {
+  n <- x[i,]%*%beta
+  z[i] <- n + (y[i]*exp(-n)) - 1
+}
+
+#letra c)
+beta <- solve(t(x) %*% W %*% x) %*% t(x) %*% W %*% z
+
+#letra d)
+ajuste = glm(y ~ x[,2], 
+             family = poisson(link = "log"),
+             start = c(1,1))
+
+summary(ajuste)
+
+# os coeficientes são significativos para o modelo
+
+#letra e)
+
+mi <- exp(predict(ajuste))
+
+#preditor <- function(beta,x){
+# n <- x%*%beta
+#resposta <- exp(n)
+#return(resposta)
+#}
+
+#beta <- as.numeric(ajuste$coefficients)
+#preditor(beta, x)
+
+D <- 2*sum(y*log(y/mi)-(y-mi))
+D
+
+grau_liber <- length(y)-2
+grau_liber
+
+Zsup <- qchisq(0.95,grau_liber)
+Zinf <- qchisq(0.90,grau_liber)
+
+Zsup
+Zinf
+
+#Como a D está abaixo do quantil ineferior, conslui-se que possa existir outras covariaveis que explicam mais o modelo.
+
+# pchisq(D, grau_liber,lower.tail = FALSE)
+
+#letra f)
+
+pearson <- sum(((y-mi)^2)/mi)
+pearson
+# sum((residuals(ajuste, type = "pearson"))^2)
+
+Zsup
+Zinf
+
+#Como pearson está abaixo do quantil ineferior, conslui-se que possa existir outras covariaveis que explicam mais o modelo.
+
+#Questão 3)
+#Letra a)
+
+dat = read.table("dados_Q3_L2_MLG.txt")
+
+dat <- dat %>% 
+  mutate(m=10)
+
+ajuste = glm( cbind(V1, m-V1) ~ V2 + V3 , family = binomial(link = "logit"), data = dat)
+summary(ajuste)
+
+#letra b)
+
+b1 <- ajuste$coefficients[2]
+100*(exp(b1*0.1)-1)
+
+#letra c)
+
+y <- dat$V1
+m <- 10
+n <- predict(ajuste)
+theta <- 1/(exp(-n)+1)
+mi <- m*theta
+
+varmi <- mi*(1-theta)
+
+r <- (y-mi)/sqrt((varmi))
+
+# rP = residuals( ajuste, type = "pearson" )
+
+
+d <- 2*(y*log(y/mi)+(m-y)*log((m-y)/(m-mi)))
+rd <- if_else((y-mi)<0,-1,1)*sqrt(d)
+
+plotar <- data.frame(mi,r)
+plotar2 <- data.frame(mi,rd)
+
+
+plotar %>% 
+  ggplot(aes(x = mi, y = r)) + 
+  geom_point()
+
+plotar2 %>% 
+  ggplot(aes(x = mi, y = rd)) + 
+  geom_point()
+
+#letra d)
+
+plotar <- data.frame(theta,dat$V2)
+plotar2 <- data.frame(theta,dat$V3)
+
+plotar %>% 
+  ggplot(aes(x = theta, y = dat$V2)) + 
+  geom_point()
+
+plotar2 %>% 
+  ggplot(aes(x = theta, y = dat$V3)) + 
+  geom_point()
+
+#materia começou slide 22 (3)e o quatro todo 
+
+

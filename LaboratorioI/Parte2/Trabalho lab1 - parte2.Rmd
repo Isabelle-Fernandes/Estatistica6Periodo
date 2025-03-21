@@ -1,0 +1,2186 @@
+---
+fontsize: 12
+mainfont: Times New Roman
+output:
+  pdf_document:
+    latex_engine: xelatex
+    toc: yes
+    fig_width: 6
+    fig_height: 5
+    df_print: paged
+    highlight: zenburn
+    extra_dependencies: float
+    fig_caption: yes
+  word_document:
+    toc: yes
+editor_options:
+  chunk_output_type: console
+  markdown:
+    wrap: 72
+header-includes: \renewcommand{\contentsname}{Sumário}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(warning = FALSE, echo = TRUE, message = FALSE)
+```
+
+```{r, include=FALSE}
+
+#Pacotes utilizados
+
+# install.packages("readxl")
+# install.packages("tidyverse")
+# install.packages("ggridges")
+# install.packages("scales")
+# install.packages("gmodels")
+# install.packages("ggplot2")
+# install.packages("caret")
+# install.packages("leaps")
+# install.packages("MASS")
+# install.packages("dplyr")
+# install.packages("reshape2")
+# install.packages("ggridges")
+# install.packages("kableExtra")
+# install.packages("formattable")
+# install.packages("stringdist")
+# install.packages("cowplot")
+
+
+
+library(ggplot2)
+library(caret)
+library(leaps)
+library(MASS)
+library(dplyr)
+library(readxl)
+library(tidyverse)
+library(reshape2)
+library(ggridges)
+library(scales)
+library(gmodels)
+library(tidyr)
+library(knitr)
+library(magrittr)
+# library(kableExtra)
+library(formattable)
+library(stringdist)
+library(cowplot)
+
+```
+
+\newpage
+
+# 1. Introdução
+
+<div style="text-align: justify">
+
+Este trabalho propõe uma análise das experiências dos turistas motivados por produções audiovisuais (**turistas específicos**), explorando como as produções audiovisuais impactam suas motivações, expectativas e percepções durante a vivência do turismo como experiência de lazer. 
+
+O autor definiu os conceitos da classificação de turistas como: 
+
+-   Casual: estava em um local relacionado ao universo das produções audiovisual por acaso;
+
+-   Geral: o local não foi escolhido especificamente motivado pelas produções audiovisuais, mas aproveitei para realizar alguma atividade relacionadas ao universo cinematográfico;
+
+-   Específica: quando a escolha do destino foi exclusivamente induzida/motivada por uma produção audiovisual.
+
+Como o interesse é entender a relação do turista motivado pelo audiovisual e as variáveis da viagem, o trabalho focalizou no grupo de turistas específicos, já que são eles que viajam motivados exclusivamente pelo audiovisual.
+
+A coleta de dados foi concretizada por meio da aplicação de um questionário
+disponibilizado pelo Google Forms, entre os meses de julho e agosto de 2022. O
+questionário incluiu 27 questões ao todo, contemplando informações sobre os dados
+sociodemográficos e a caracterização do grupo de voluntários: idade, gênero, educação,
+ocupação, país e região do residente; questões relacionadas ao turismo
+induzido por produções audiovisuais; questões relacionadas à viagem realizada pelos participantes da pesquisa, contemplando as seguintes categorias: motivação, percepção e sentimentos. Ao todo, participaram 121 voluntários, recrutados por meio de divulgação da pesquisa em redes sociais e convites enviados por e-mail. Das 121 respostas, 117 foram válidas e e quatro descartadas, visto que os participantes não responderam à pergunta sobre a viagem realizada, um requisito essencial para participar da pesquisa.
+
+
+<div/>
+
+<div style="text-align: justify">
+
+#### 1.1 Objetivos Gerais do estudo\
+\
+Identificar as variáveis que impactam mais quando a viagem é motivada exclusivamente pelo audiovisual.
+
+<div/>
+
+<div style="text-align: justify">
+
+#### 1.2 Objetivos Específicos
+
+-   Fazer uma análise por grupo de entrevistados;
+
+-   Mensurar o impacto das variáveis que estão mais associadas com o turista específico
+
+<div/>    
+
+
+\newpage
+# 2 Metodologia
+
+<div style="text-align: justify">
+
+O presente estudo busca uma compreensão aprofundada das motivações dos turistas ao visitarem uma localidade específica, com especial ênfase na influência do audiovisual.
+
+**1. Tratamento do Banco de Dados:** Inicialmente, o banco de dados, coletado pelo nosso cliente, passou por um processo de tratamento. Essa etapa foi crucial para garantir a integridade e relevância dos dados, permitindo uma análise estatística mais precisa.
+
+**2. Análise Exploratória:** Utilizando estatísticas descritivas e gráficos para obter e apresentar insights preliminares sobre as variáveis presentes no banco de dados. Isso proporcionou uma compreensão inicial da distribuição e tendências dos dados, destacando padrões e anomalias que orientaram as etapas subsequentes da pesquisa.
+
+**3. Testes Qui-Quadrado:** Para investigar as relações entre a variável de interesse, representada pelo grupo dos participantes, e outras variáveis relevantes, empregamos testes qui-quadrado. Com isso determinamos se existem associações significativas entre as variáveis, revelando fatores que influenciam a motivação dos turistas. Os resultados orientaram a seleção das variáveis mais relevantes para o modelo de regressão logística.
+
+**4. Modelo de Regressão Logística:** Com base nas variáveis identificadas como estatisticamente significativas nos testes qui-quadrado, desenvolvemos um modelo de regressão logística explorando a relação entre as variáveis independentes selecionadas e a variável dependente de interesse.
+
+<div/>
+
+\newpage
+
+# 3 Resultados
+
+<div style="text-align: justify">
+
+Os resultados são apresentados de maneira abrangente, com gráficos, testes estatísticos para avaliação das variáveis e tabelas que descrevem os dados no geral. Além disso, foram empregadas a regressão logística para compreender a relação das variáveis explicativas com a variável de interesse. 
+
+<div/>
+
+<div style="text-align: justify">
+
+**Teste qui-quadrado de independência**
+
+Foi aplicado o teste qui-quadrado para verificar se existe associação entre as variáveis grupo com cada uma das outras variáveis qualitativas.
+
+Hipóteses:
+
+$H_0$: As variáveis **grupo** com outra variável de interesse são independentes
+
+$H_1$: As variáveis **grupo** com outra variável de interesse estão associadas
+
+Caso o valor-p do teste seja inferior a 0.05, então rejeitamos $H_0$ e acredita-se com que as variáveis analisadas estejam associadas. Em outras palavras, significa dizer que a proporção do cruzamento das duas variáveis é significativa.
+
+<div/>
+
+## 3.1 Análise exploratória - Estatísticas descritivas
+
+```{r, echo = FALSE, include = FALSE}
+#Leitura e organizacao dos dados
+
+banco <- read_excel("respostas.xlsx", sheet = "Respostas ao formulário 1")
+
+banco <- as.data.frame(banco[,c(3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,20,21,23,24,26,28)])
+
+```
+
+```{r, echo = FALSE, include = FALSE}
+
+# banco[,12] é "12. A experiência turística e/ou cinematográfica vivida neste destino foi:"
+
+for (i in 1:117) {
+  if(banco[i,12] %in% c("Geral","Casual")){
+    banco[i,12] = 'Geral ou Casual'
+  }
+}
+
+# banco[,2] é "2. Faixa etária:"
+
+# unique(banco[2])
+
+for (i in 1:117) {
+  if(banco[i,2] %in% c("Mais de 60", "Entre 41 - 50", "Entre 51 - 60")){
+    banco[i,2] = 'Mais de 41'
+  }
+  if(banco[i,2] %in% c("Entre 18 - 20", "Entre 21 - 24", "Entre 25 - 30")){
+    banco[i,2] = 'Entre 18 - 30'
+  }
+}
+
+# banco[,5] é "5. Em qual região do Brasil você reside atualmente?"
+
+# unique(banco[5])
+
+for (i in 1:117) {
+  if(banco[i,5] %in% c("Não se aplica, resido no exterior.")){
+    banco[i,5] = 'Resido no exterior'
+  }
+}
+
+
+# banco[4] é "4. Nível de escolaridade concluído:"
+
+# unique(banco[4])
+
+for (i in 1:117) {
+  if(banco[i,4] %in% c("Pos doutoramento","Livre docente")){
+    banco[i,4] = 'Doutorado'
+  }
+}
+
+for (i in 1:117) {
+  if(banco[i,4] %in% c("Pós-Graduação ou Mestrado","Doutorado")){
+    banco[i,4] = 'Ensino Médio'
+  }
+}
+
+# banco[8] é "8. Com que frequência você assiste a filmes, séries, telenovelas, clipes musicais ou outras produções audiovisuais?"
+
+# unique(banco[8])
+
+for (i in 1:117) {
+  if(banco[i,8] %in% c("Somente aos fins de semana","2 vezes por semana", "1 vez por semana")){
+    banco[i,8] = 'Poucas vezes por semana'
+  }
+  else{
+      banco[i,8] = 'Várias vezes por semana'
+  }
+}
+
+# banco[19] é "21. Com quem você viajou?"
+
+# unique(banco[19])
+
+for (i in 1:117) {
+  if(banco[i,19] %in% c("Colegas","Ex namorado","Amigos e namorado.","Marido e outros familiares", "Sozinha ou com amigos e/ou familiares")){
+    banco[i,19] = 'Outros'
+  }
+}
+
+# banco[19] é "22. Como você classificaria o seu nível de satisfação com a sua viagem induzida pelo audiovisual:"
+
+# unique(banco[20])
+
+for (i in 1:117) {
+  if(banco[i,20] %in% c("Muito insatisfeito","Indiferente","Satisfeito")){
+    banco[i,20] = 'Satisfeito/ Indiferente/ Muito insatisfeito'
+  }
+}
+
+
+
+```
+
+```{r, echo = FALSE, include = FALSE}
+names(banco)[7] <- 'X' #7. Quais os tipos de produção audiovisual você mais gosta de assistir? Se necessário, marque mais de uma opção.
+
+# Funcao para checar se opcao foi marcada
+check_option1 <- function(string, option) {
+  options <- strsplit(string, ", ")[[1]]
+  if (option %in% options) {
+    return(1)
+  } else {
+    return(0)
+  }
+}
+
+# Apply the function to each row and create new columns
+banco <- banco %>%
+  mutate(Filmes = sapply(X, check_option1, option = "Filmes"),
+         Novelas = sapply(X, check_option1, option = "Novelas"),
+         Seriados = sapply(X, check_option1, option = "Seriados"),
+         'Clipes de música' = sapply(X, check_option1, option = "Clipes de música"),
+         'Outro audiovisual' = sapply(X, check_option1, option = "Outros"))
+
+#removendo a coluna que dava todos dados juntos
+banco <- subset(banco, select = -X)
+
+
+names(banco)[9] <- 'X' #10. Qual? Se necessário, marque mais de uma opção.
+
+# Apply the function to each row and create new columns
+banco <- banco %>%
+  mutate('Netflix' = sapply(X, check_option1, option = "Netflix"),
+         Globoplay = sapply(X, check_option1, option = "Globoplay"),
+         'Amazon Prime Vídeo' = sapply(X, check_option1, option = "Amazon Prime Vídeo"),
+         'HBO Max' = sapply(X, check_option1, option = "HBO Max"),
+         'Disney+' = sapply(X, check_option1, option = "Disney+"),
+         'Telecine' = sapply(X, check_option1, option = "Telecine"),
+         'Star+' = sapply(X, check_option1, option = "Star+"),
+         Viki = sapply(X, check_option1, option = "Viki"),
+         'Outros streamig' = sapply(X, check_option1, option = "Outros"))
+         
+
+#removendo a coluna que dava todos dados juntos
+banco <- subset(banco, select = -X)
+
+
+check_option2 <- function(string, option) {
+  options <- strsplit(string, "\\., ")[[1]]
+  distancia_corte <- 3
+  distancias <- stringdistmatrix(option, options, method = "lv")
+  if (is.na(any(distancias <= distancia_corte))){
+    return(NA)
+  } else if (any(distancias <= distancia_corte)) {
+    return(1)
+  } else {
+    return(0)
+  }
+}
+
+names(banco)[14] <- 'X' #16. Quais atividades de lazer você realizou durante a viagem, relacionada ao audiovisual?
+
+# Apply the function to each row and create new columns
+
+banco <- banco %>% 
+  mutate("Visita a parques, praças e espaços na natureza exibidos na tela" = sapply(X, check_option2, option = "Visita a parques, praças e espaços na natureza exibidos na tela"),
+         "Visita a Parques temáticos baseados em atrações inspiradas em séries, filmes, etc" = sapply(X, check_option2, option = "Visita a Parques temáticos baseados em atrações inspiradas em séries, filmes, etc"),
+         "Visita a cenários internos ou externos onde foram filmadas" = sapply(X, check_option2, option = "Visita a cenários internos ou externos onde foram filmadas"),
+         "Desfrute da gastronomia retratada na tela, incluindo alimentos e bebidas" = sapply(X, check_option2, option = "Desfrute da gastronomia retratada na tela, incluindo alimentos e bebidas"),
+         "Participação em eventos relacionados a filmes" = sapply(X, check_option2, option = "Participação em eventos relacionados a filmes"),
+         "Visita a estabelecimentos exibidos na tela, como bares, restaurantes e outros" = sapply(X, check_option2, option = "Visita a estabelecimentos exibidos na tela, como bares, restaurantes e outros"),
+         "Realização de roteiros guiados em locais de filmagem" = sapply(X, check_option2, option = "Realização de roteiros guiados em locais de filmagem"),
+         "Outra atividade" = sapply(X, check_option2, option = "Outros"),
+         "Visita a patrimônios culturais exibidos na tela" = sapply(X, check_option2, option = "Visita a patrimônios culturais exibidos na tela"))
+
+
+#removendo a coluna que dava todos dados juntos
+banco <- subset(banco, select = -X)
+
+names(banco)[14] <- 'X' # 18. Quais sentimentos foram despertados em você ao viver essa experiência turística e cinematográfica de lazer?
+
+# Apply the function to each row and create new columns
+
+banco <- banco %>% 
+  mutate(Nostalgia = sapply(X, check_option1, option = "Nostalgia"),
+         Autorrealização = sapply(X, check_option1, option = "Autorrealização"),
+         "Escapismo da realidade" = sapply(X, check_option1, option = "Escapismo da realidade"),
+         Fantasia = sapply(X, check_option1, option = "Fantasia"),
+         Encantamento = sapply(X, check_option1, option = "Encantamento"),
+         Romance = sapply(X, check_option1, option = "Romance"),
+         "Superação de desafios" = sapply(X, check_option1, option = "Superação de desafios"),
+         "Outro sentimento" = sapply(X, check_option1, option = "Outros"))
+
+#removendo a coluna que dava todos dados juntos
+banco <- subset(banco, select = -X)
+
+```
+
+```{r, echo = FALSE, include = FALSE}
+#Organizando o nome das variaveis do banco
+
+# names(banco)
+
+banco <- banco[,c(-3,-6,-9,-11,-13,-17)] # retirei do banco variáveis de resposta livre
+# retirei também pergunta 15 (é a mesma coisa da pergunta 16) e pegunta 24 (é a mesma coisa da pergunta 22)
+
+
+names(banco)[1:12] <- c('Sexo','Idade','Escolaridade',"Região residência", 'Frequência audiovisuais','Assinatura streaming','Grupo','Motivação',"Percepção",'Companhia', 'Satisfação', 'Realizar outra viagem pelo audiovisual')
+
+#Organizando os tipos de variaveis do banco
+
+bancofator <- banco
+
+for (i in 1:length(names(bancofator))) {
+  bancofator[,i] <- as.factor(bancofator[,i])
+}
+
+# str(bancofator)
+
+```
+
+```{r, echo = FALSE, include = FALSE}
+
+ordem_original <- names(bancofator)[1:12]
+
+#Result guarda tabela resumo das perguntas cuja resposta é marcar um oval
+result <- bancofator %>%
+  pivot_longer(cols = 1:12, names_to = "Variável") %>%
+  count(Variável, value = value) %>%
+  rename(Quantidade = n,
+         Nível = value) %>% 
+  mutate(Percentual= percent(Quantidade/117,1)) %>% 
+  na.omit() %>% 
+  mutate(Variável = factor(Variável, levels = ordem_original)) %>%
+  arrange(Variável)
+
+
+ordem_original2 <- names(bancofator)[13:43]
+
+#Result2 guarda resumo das perguntas cuja resposta é marcar mais de um oval
+result2 <- bancofator %>%
+  pivot_longer(cols = 13:43, names_to = "Variável") %>%
+  count(Variável, value = value) %>%
+  rename(Quantidade = n,
+         Nível = value) %>% 
+  mutate(Percentual= percent(Quantidade/117,1)) %>% 
+  na.omit() %>% 
+  filter(Nível != 0) %>% 
+  mutate(Variável = factor(Variável, levels = ordem_original2)) %>%
+  arrange(Variável)
+
+#Esses "result's" servirão para fazermos os gráficos mais facilmente
+
+```
+
+### Gráfico 1: Turistas classificados segundo o grupo
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+banco %>% 
+  group_by(Grupo) %>% 
+  summarise(Quantidade=n()) %>% 
+  mutate(Percentual = percent(Quantidade/sum(Quantidade),1)) %>% 
+  ggplot(aes(x=Grupo, y=Quantidade, 
+           label = Percentual)) + 
+  geom_bar(stat = "identity",position = "dodge", fill="#9cd1f0") +
+  geom_label(position = position_dodge(width = 1), show.legend = F, ) +
+  theme_light() +
+  theme(axis.title.y = element_blank()) + 
+  theme(axis.title.x = element_blank()) +
+  theme(legend.title = element_text(size = 10))
+```
+
+### Gráfico 2: Sexo por grupo
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+grafico1 <- result[1:2,] %>% 
+  ggplot(aes(x=reorder(Nível, -Quantidade), y=Quantidade, label = Percentual)) + 
+  geom_bar(stat = "identity",position = "dodge", fill="#9cd1f0") +
+  geom_label(position = position_dodge(width = 1), show.legend = F, size=3) +
+  scale_y_continuous(breaks = seq(0,100,20)) +
+  theme_light() +
+  theme(axis.title.y = element_blank()) + 
+  theme(axis.title.x = element_blank()) +
+  theme(legend.title = element_text(size = 10))
+
+grafico2 <- banco %>% 
+  group_by(Grupo, Sexo) %>%
+  summarise(Quantidade=n()) %>% 
+  group_by(Grupo) %>% 
+  mutate(Percentual = percent(Quantidade/sum(Quantidade),1)) %>% 
+  ggplot(aes(x=Grupo, y=Percentual, 
+           fill=Sexo, label = Percentual)) + 
+  geom_bar(stat = "identity",position = "dodge") +
+  geom_label(position = position_dodge(width = 1), show.legend = F, ) +
+  scale_fill_manual(name="Sexo dos turistas", values=c('#9cd1f0','#368196')) +
+  coord_cartesian(ylim = c(0,1)) +
+  theme_light() +
+  theme(axis.title.y = element_blank()) + 
+  theme(axis.title.x = element_blank()) +
+  theme(legend.title = element_text(size = 10),
+        legend.position = "bottom") 
+
+
+plot_grid(grafico1, grafico2, ncol = 1)
+qui <- chisq.test(banco$Grupo, banco$Sexo)[[3]]
+
+cat(paste0("Valor-p do teste qui-quadrado: ", round(qui, 4),". ", paste0(if_else(qui>0.05, "Como o valor-p é superior a 0.05, não rejeitamos a hipótese \nnula e acredita-se que as variáveis são independentes.", "Como o valor-p é inferior a 0.05, rejeitamos a hipótese nula\n e acredita-se que as variáveis estão associadas." ))))
+```
+
+
+### Gráfico 3: Faixa etária por grupo
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+grafico1 <- result[3:5,] %>% 
+  ggplot(aes(x=reorder(Nível, -Quantidade), y=Quantidade, label = Percentual)) + 
+  geom_bar(stat = "identity",position = "dodge", fill="#9cd1f0") +
+  geom_label(position = position_dodge(width = 1), show.legend = F, size=3) +
+  scale_y_continuous(breaks = seq(0,100,10)) +
+  theme_light() +
+  theme(axis.title.y = element_blank()) + 
+  theme(axis.title.x = element_blank()) +
+  theme(legend.title = element_text(size = 10))
+
+grafico2 <- banco %>% 
+  group_by(Grupo, Idade) %>%
+  summarise(Quantidade=n()) %>% 
+  group_by(Grupo) %>% 
+  mutate(Percentual = percent(Quantidade/sum(Quantidade),1)) %>% 
+  ggplot(aes(x=Grupo, y=Percentual, 
+           fill=Idade, label = Percentual)) + 
+  geom_bar(stat = "identity",position = "dodge") +
+  geom_label(position = position_dodge(width = 1), show.legend = F, size=3) +
+  scale_fill_manual(name="Faixa etária", values=c("#69b3e2",'#368196',"#69b3a2",'#368142', "#01d8a2","#9cd1f0", "#708142")) + 
+  coord_cartesian(ylim = c(0,1)) +
+  theme_light() +
+  theme(axis.title.y = element_blank()) + 
+  theme(axis.title.x = element_blank()) +
+  theme(legend.title = element_text(size = 10),
+        legend.position = "bottom")
+
+plot_grid(grafico1, grafico2, ncol = 1, align = 'v', axis = 'lr', rel_heights = c(5, 5))
+qui <- chisq.test(banco$Grupo, banco$Idade)[[3]]
+cat(paste0("Valor-p do teste qui-quadrado: ", round(qui, 4),". ", paste0(if_else(qui>0.05, "Como o valor-p é superior a 0.05, não rejeitamos a hipótese \nnula e acredita-se que as variáveis são independentes.", "Como o valor-p é inferior a 0.05, rejeitamos a hipótese nula\n e acredita-se que as variáveis estão associadas." ))))
+```
+
+### Gráfico 4: Escolaridade por grupo
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+grafico1 <- result[6:7,] %>% 
+  na.omit() %>% 
+  ggplot(aes(x=reorder(Nível, -Quantidade), y=Quantidade, label = Percentual)) + 
+  geom_bar(stat = "identity",position = "dodge", fill="#9cd1f0") +
+  geom_label(position = position_dodge(width = 1), show.legend = F, size=3) +
+  scale_y_continuous(breaks = seq(0,100,20)) +
+  theme_light() +
+  theme(axis.title.y = element_blank()) + 
+  theme(axis.title.x = element_blank()) +
+  theme(legend.title = element_text(size = 10)) 
+
+grafico2 <- banco %>% 
+  group_by(Grupo, Escolaridade) %>%
+  summarise(Quantidade=n()) %>% 
+  group_by(Grupo) %>% 
+  mutate(Percentual = percent(Quantidade/sum(Quantidade),1)) %>% 
+  na.omit() %>% 
+  ggplot(aes(x=Grupo, y=Percentual, 
+           fill=Escolaridade, label = Percentual)) + 
+  geom_bar(stat = "identity",position = "dodge") +
+  geom_label(position = position_dodge(width = 1), show.legend = F, size=3) +
+  scale_fill_manual(name="Escolaridade", values=c('#9cd1f0','#368196')) + 
+  coord_cartesian(ylim = c(0,1)) +
+  theme_light() +
+  theme(axis.title.y = element_blank()) + 
+  theme(axis.title.x = element_blank()) +
+  theme(legend.title = element_text(size = 10),
+        legend.position = "bottom")
+
+plot_grid(grafico1, grafico2, ncol = 1)
+qui <- chisq.test(banco$Grupo, banco$Escolaridade)[[3]]
+cat(paste0("Valor-p do teste qui-quadrado: ", round(qui, 4),". ", paste0(if_else(qui>0.05, "Como o valor-p é superior a 0.05, não rejeitamos a hipótese \nnula e acredita-se que as variáveis são independentes.", "Como o valor-p é inferior a 0.05, rejeitamos a hipótese nula\n e acredita-se que as variáveis estão associadas." ))))
+```
+
+### Gráfico 5: Região de residência por grupo
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+grafico1 <- result[8:13,] %>% 
+  na.omit() %>% 
+  ggplot(aes(x=reorder(Nível, -Quantidade), y=Quantidade, label = Percentual)) + 
+  geom_bar(stat = "identity",position = "dodge", fill="#9cd1f0") +
+  geom_label(position = position_dodge(width = 1), show.legend = F, size=3) +
+  scale_y_continuous(breaks = seq(0,100,20)) +
+  theme_light() +
+  theme(axis.title.y = element_blank()) + 
+  theme(axis.title.x = element_blank()) +
+  theme(legend.title = element_text(size = 10)) +
+  theme(axis.text.x = element_text(angle = -10, vjust = 0.5, hjust=0.5))
+
+grafico2 <- banco %>% 
+  group_by(Grupo,`Região residência` ) %>%
+  summarise(Quantidade=n()) %>% 
+  group_by(Grupo) %>% 
+  mutate(Percentual = percent(Quantidade/sum(Quantidade),1)) %>% 
+  na.omit() %>% 
+  ggplot(aes(x=reorder(Grupo, -Quantidade), y=Percentual, 
+           fill=`Região residência`, label = Percentual)) + 
+  geom_bar(stat = "identity",position = "dodge") +
+  geom_label(position = position_dodge(width = 1), show.legend = F, size=3) +
+  scale_fill_manual(name="Companhia", values=c("#9cd1f0",'#368196',"#69b3a2", "#01d8a2","#69b3e2", '#368142')) +
+  coord_cartesian(ylim = c(0,1)) +
+  theme_light() +
+  theme(axis.title.y = element_blank()) + 
+  theme(axis.title.x = element_blank()) +
+  theme(legend.title = element_text(size = 10)) +
+  theme(legend.position = c(0.9,0.75)) +
+  theme(legend.key.size = unit(0.5, 'cm'),
+        legend.position = "bottom")
+
+
+plot_grid(grafico1, grafico2, ncol = 1)
+qui <- chisq.test(banco$Grupo, banco$`Região residência`)[[3]]
+cat(paste0("Valor-p do teste qui-quadrado: ", round(qui, 4),". ", paste0(if_else(qui>0.05, "Como o valor-p é superior a 0.05, não rejeitamos a hipótese \nnula e acredita-se que as variáveis são independentes.", "Como o valor-p é inferior a 0.05, rejeitamos a hipótese nula\n e acredita-se que as variáveis estão associadas." ))))
+
+```
+
+### Gráfico 6: Frequência de consumo audiovisual por grupo
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+grafico1 <- result[14:15,] %>% 
+  na.omit() %>% 
+  ggplot(aes(x=reorder(Nível, -Quantidade), y=Quantidade, label = Percentual)) + 
+  geom_bar(stat = "identity",position = "dodge", fill="#9cd1f0") +
+  geom_label(position = position_dodge(width = 1), show.legend = F, size=3) +
+  scale_y_continuous(breaks = seq(0,100,20)) +
+  theme_light() +
+  theme(axis.title.y = element_blank()) + 
+  theme(axis.title.x = element_blank()) +
+  theme(legend.title = element_text(size = 10))
+
+grafico2 <- banco %>% 
+  group_by(Grupo, `Frequência audiovisuais`) %>%
+  summarise(Quantidade=n()) %>% 
+  group_by(Grupo) %>% 
+  mutate(Percentual = percent(Quantidade/sum(Quantidade),1)) %>% 
+  na.omit() %>% 
+  ggplot(aes(x=Grupo, y=Percentual, 
+           fill=`Frequência audiovisuais`, label = Percentual)) + 
+  geom_bar(stat = "identity",position = "dodge") +
+  geom_label(position = position_dodge(width = 1), show.legend = F, size=3) +
+  scale_fill_manual(name="Frequência audiovisuais", values=c("#9cd1f0",'#368196', "#69b3e2",'#368142','#368196', "#01d8a2","#9cd1f0")) + 
+  coord_cartesian(ylim = c(0,1)) +
+  theme_light() +
+  theme(axis.title.y = element_blank()) + 
+  theme(axis.title.x = element_blank()) +
+  theme(legend.title = element_text(size = 10),
+        legend.position = "bottom") 
+
+plot_grid(grafico1, grafico2, ncol = 1)
+qui <- chisq.test(banco$Grupo, banco$`Frequência audiovisuais`)[[3]]
+cat(paste0("Valor-p do teste qui-quadrado: ", round(qui, 4),". ", paste0(if_else(qui>0.05, "Como o valor-p é superior a 0.05, não rejeitamos a hipótese \nnula e acredita-se que as variáveis são independentes.", "Como o valor-p é inferior a 0.05, rejeitamos a hipótese nula\n e acredita-se que as variáveis estão associadas." ))))
+```
+
+### Gráfico 7: Assinatura streaming por grupo
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+grafico1 <- result[16:17,] %>% 
+  na.omit() %>% 
+  ggplot(aes(x=reorder(Nível, -Quantidade), y=Quantidade, label = Percentual)) + 
+  geom_bar(stat = "identity",position = "dodge", fill="#9cd1f0") +
+  geom_label(position = position_dodge(width = 1), show.legend = F, size=3) +
+  scale_y_continuous(breaks = seq(0,100,20)) +
+  theme_light() +
+  theme(axis.title.y = element_blank()) + 
+  theme(axis.title.x = element_blank()) +
+  theme(legend.title = element_text(size = 10)) 
+
+grafico2 <- banco %>% 
+  group_by(Grupo, `Assinatura streaming`) %>%
+  summarise(Quantidade=n()) %>% 
+  group_by(Grupo) %>% 
+  mutate(Percentual = percent(Quantidade/sum(Quantidade),1)) %>% 
+  na.omit() %>% 
+  ggplot(aes(x=Grupo, y=Percentual, 
+           fill=`Assinatura streaming`, label = Percentual)) + 
+  geom_bar(stat = "identity",position = "dodge") +
+  geom_label(position = position_dodge(width = 1), show.legend = F, size=3) +
+  scale_fill_manual(name="Assinatura streaming", values=c('#368196',"#9cd1f0")) +
+  coord_cartesian(ylim = c(0,1)) +
+  theme_light() +
+  theme(axis.title.y = element_blank()) + 
+  theme(axis.title.x = element_blank()) +
+  theme(legend.title = element_text(size = 10),
+        legend.position = "bottom") 
+
+plot_grid(grafico1, grafico2, ncol = 1)
+qui <- chisq.test(banco$Grupo, banco$`Assinatura streaming`)[[3]]
+cat(paste0("Valor-p do teste qui-quadrado: ", round(qui, 4),". ", paste0(if_else(qui>0.05, "Como o valor-p é superior a 0.05, não rejeitamos a hipótese \nnula e acredita-se que as variáveis são independentes.", "Como o valor-p é inferior a 0.05, rejeitamos a hipótese nula\n e acredita-se que as variáveis estão associadas." ))))
+```
+
+### Gráfico 8: Motivação da viagem por grupo
+
+```{r,  plot-wider, fig.width=10, fig.height=8, echo=FALSE, message=FALSE, warning=FALSE}
+grafico1 <- result[20:23,] %>% 
+  na.omit() %>% 
+  ggplot(aes(x=reorder(Nível, -Quantidade), y=Quantidade, label = Percentual, fill = reorder(Nível, -Quantidade))) + 
+  geom_bar(stat = "identity") +
+  scale_fill_manual(name="Motivação da viagem", values=c("#9cd1f0",'#368196',"#69b3a2", "#01d8a2","#69b3e2", '#368142')) + 
+  geom_label(position = position_dodge(width = 1), show.legend = F, size=3) +
+  labs(x = NULL) +
+  scale_y_continuous(breaks = seq(0,115,20)) +
+  theme_light() +
+  theme(axis.title.y = element_blank()) + 
+  theme(axis.text.x = element_blank()) +
+  theme(axis.title.x = element_blank()) +
+  theme(legend.title = element_text(size = 10)) +
+  theme(legend.position = c(0.6,0.75)) +
+  theme(legend.key.size = unit(0.5, 'cm'))
+      #theme(
+    #legend.position = "bottom",  # Posicionar a legenda abaixo do gráfico
+    #legend.box = "vertical"
+    # Ajustar o estilo da caixa da legenda para horizontal
+  #)
+
+
+grafico2 <- banco %>% 
+  group_by(Grupo, Motivação) %>%
+  summarise(Quantidade=n()) %>% 
+  group_by(Grupo) %>% 
+  mutate(Percentual = percent(Quantidade/sum(Quantidade),1)) %>% 
+  na.omit() %>% 
+  ggplot(aes(x=Grupo, y=Percentual, 
+           fill=Motivação, label = Percentual)) + 
+  geom_bar(stat = "identity",position = "dodge") +
+  geom_label(position = position_dodge(width = 1), show.legend = F, size=3) +
+  scale_fill_manual(name="Motivação da viagem",values=c("#9cd1f0",'#368196',"#69b3a2", "#01d8a2","#69b3e2", '#368142')) + 
+  coord_cartesian(ylim = c(0,1)) +
+  theme_light() +
+  theme(axis.title.y = element_blank()) + 
+  theme(axis.title.x = element_blank()) +
+  theme(legend.title = element_text(size = 10)) +
+  theme(legend.key.size = unit(0.5, 'cm'),
+        legend.position = c(0.6,0.6))
+  
+    #theme(
+    #legend.position = "bottom",  # Posicionar a legenda abaixo do gráfico
+    #legend.box = "vertical"
+    # Ajustar o estilo da caixa da legenda para horizontal
+  #)
+
+
+plot_grid(grafico1, grafico2, ncol = 1)
+qui <- chisq.test(banco$Grupo, banco$Motivação)[[3]]
+cat(paste0("Valor-p do teste qui-quadrado: ", round(qui, 4),". ", paste0(if_else(qui>0.05, "Como o valor-p é superior a 0.05, não rejeitamos a hipótese \nnula e acredita-se que as variáveis são independentes.", "Como o valor-p é inferior a 0.05, rejeitamos a hipótese nula\n e acredita-se que as variáveis estão associadas." ))))
+```
+
+### Gráfico 9: Locais visitados estavam de acordo com os retratados em produção audiovisual por grupo
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+grafico1 <- result[24:26,] %>% 
+  na.omit() %>% 
+  ggplot(aes(x=reorder(Nível, -Quantidade), y=Quantidade, label = Percentual)) + 
+  geom_bar(stat = "identity",position = "dodge", fill="#9cd1f0") +
+  geom_label(position = position_dodge(width = 1), show.legend = F, size=3) +
+  scale_y_continuous(breaks = seq(0,100,20)) +
+  theme_light() +
+  theme(axis.title.y = element_blank()) + 
+  theme(axis.title.x = element_blank()) +
+  theme(legend.title = element_text(size = 10)) 
+
+grafico2 <- banco %>% 
+  group_by(Grupo, Percepção) %>%
+  summarise(Quantidade=n()) %>% 
+  group_by(Grupo) %>% 
+  mutate(Percentual = percent(Quantidade/sum(Quantidade),1)) %>% 
+  na.omit() %>% 
+  ggplot(aes(x=Grupo, y=Percentual, 
+           fill=Percepção, label = Percentual)) + 
+  geom_bar(stat = "identity",position = "dodge") +
+  geom_label(position = position_dodge(width = 1), show.legend = F, size=3) +
+  scale_fill_manual(name="Percepção", values=c('#368196',"#9cd1f0","#69b3a2")) + 
+  coord_cartesian(ylim = c(0,1)) +
+  theme_light() +
+  theme(axis.title.y = element_blank()) + 
+  theme(axis.title.x = element_blank()) +
+  theme(legend.title = element_text(size = 10),
+        legend.position = "bottom") 
+
+plot_grid(grafico1, grafico2, ncol = 1)
+qui <- chisq.test(banco$Grupo, banco$Percepção)[[3]]
+cat(paste0("Valor-p do teste qui-quadrado: ", round(qui, 4),". ", paste0(if_else(qui>0.05, "Como o valor-p é superior a 0.05, não rejeitamos a hipótese \nnula e acredita-se que as variáveis são independentes.", "Como o valor-p é inferior a 0.05, rejeitamos a hipótese nula\n e acredita-se que as variáveis estão associadas." ))))
+```
+
+### Gráfico 10: Companhia da viagem por grupo
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+grafico1 <- result[27:32,] %>% 
+  na.omit() %>% 
+  ggplot(aes(x=reorder(Nível, -Quantidade), y=Quantidade, label = Percentual, fill = reorder(Nível, -Quantidade))) + 
+  geom_bar(stat = "identity") + 
+  geom_label(position = position_dodge(width = 1), show.legend = F, size=3) +
+  scale_fill_manual(name="Companhia", values=c("#9cd1f0",'#368196',"#69b3a2", "#01d8a2","#69b3e2", '#368142')) +
+  scale_y_continuous(breaks = seq(0,115,20)) +
+  theme_light() +
+  theme(axis.title.y = element_blank()) + 
+  theme(axis.text.x = element_blank()) +
+  theme(axis.title.x = element_blank()) +
+  theme(legend.title = element_text(size = 10),
+        legend.text = element_text(size = 8)) +
+  theme(legend.position = c(0.9,0.75)) +
+  theme(legend.key.size = unit(0.4, 'cm'),
+        legend.position = "bottom")
+
+grafico2 <- banco %>% 
+  group_by(Grupo, Companhia) %>%
+  summarise(Quantidade=n()) %>% 
+  group_by(Grupo) %>% 
+  mutate(Percentual = percent(Quantidade/sum(Quantidade),1)) %>% 
+  na.omit() %>% 
+  ggplot(aes(x=Grupo, y=Percentual, 
+           fill=Companhia, label = Percentual)) + 
+  geom_bar(stat = "identity",position = "dodge") +
+  geom_label(position = position_dodge(width = 1), show.legend = F, size=3) +
+  scale_fill_manual(name="Companhia", values=c("#9cd1f0",'#368196',"#69b3a2", "#01d8a2","#69b3e2", '#368142')) +
+  coord_cartesian(ylim = c(0,1)) +
+  theme_light() +
+  theme(axis.title.y = element_blank()) + 
+  theme(axis.title.x = element_blank()) +
+  theme(legend.title = element_text(size = 10),
+        legend.text = element_text(size = 8)) +
+  theme(legend.position = c(0.9,0.75)) +
+  theme(legend.key.size = unit(0.4, 'cm'),
+        legend.position = "bottom")
+
+
+plot_grid(grafico1, grafico2, ncol = 1)
+qui <- chisq.test(banco$Grupo, banco$Companhia)[[3]]
+cat(paste0("Valor-p do teste qui-quadrado: ", round(qui, 4),". ", paste0(if_else(qui>0.05, "Como o valor-p é superior a 0.05, não rejeitamos a hipótese \nnula e acredita-se que as variáveis são independentes.", "Como o valor-p é inferior a 0.05, rejeitamos a hipótese nula\n e acredita-se que as variáveis estão associadas." ))))
+
+```
+
+### Gráfico 11: Satisfação com viagem induzida pelo audiovisual por grupo
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+grafico1 <- result[33:34,] %>% 
+  na.omit() %>% 
+  ggplot(aes(x=reorder(Nível, -Quantidade), y=Quantidade, label = Percentual, fill = reorder(Nível, -Quantidade))) + 
+  geom_bar(stat = "identity") + 
+  geom_label(position = position_dodge(width = 1), show.legend = F, size=3) +
+  scale_fill_manual(name="Satisfação com a viagem", values=c('#9cd1f0','#368196',"#69b3a2", "#69b3e2",'#368142','#368196', "#01d8a2","#9cd1f0")) +
+  scale_y_continuous(breaks = seq(0,100,10)) +
+  theme_light() +
+  theme(axis.title.y = element_blank()) + 
+  theme(axis.text.x = element_blank()) +
+  theme(axis.title.x = element_blank()) +
+  theme(legend.title = element_text(size = 10),
+        legend.position = "bottom")
+
+grafico2 <- banco %>% 
+  group_by(Grupo, Satisfação) %>%
+  summarise(Quantidade=n()) %>% 
+  group_by(Grupo) %>% 
+  mutate(Percentual = percent(Quantidade/sum(Quantidade),1)) %>% 
+  na.omit() %>% 
+  ggplot(aes(x=Grupo, y=Percentual, 
+           fill=Satisfação, label = Percentual)) + 
+  geom_bar(stat = "identity",position = "dodge") +
+  geom_label(position = position_dodge(width = 1), show.legend = F, size=3) +
+  scale_fill_manual(name="Satisfação com a viagem", values=c('#9cd1f0','#368196',"#69b3a2", "#69b3e2",'#368142','#368196', "#01d8a2","#9cd1f0")) +
+  coord_cartesian(ylim = c(0,1)) +
+  theme_light() +
+  theme(axis.title.y = element_blank()) + 
+  theme(axis.title.x = element_blank()) +
+  theme(legend.title = element_text(size = 10),
+        legend.position = "bottom") 
+
+
+plot_grid(grafico1, grafico2, ncol = 1)
+qui <- chisq.test(banco$Grupo, banco$Satisfação)[[3]]
+cat(paste0("Valor-p do teste qui-quadrado: ", round(qui, 4),". ", paste0(if_else(qui>0.05, "Como o valor-p é superior a 0.05, não rejeitamos a hipótese \nnula e acredita-se que as variáveis são independentes.", "Como o valor-p é inferior a 0.05, rejeitamos a hipótese nula\n e acredita-se que as variáveis estão associadas." ))))
+```
+
+### Gráfico 12: Realizar outra viagem pelo audiovisual por grupo
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+grafico1 <- result[35:36,] %>% 
+  ggplot(aes(x=reorder(Nível, -Quantidade), y=Quantidade, label = Percentual)) + 
+  geom_bar(stat = "identity",position = "dodge", fill="#9cd1f0") +
+  geom_label(position = position_dodge(width = 1), show.legend = F, size=3) +
+  scale_y_continuous(breaks = seq(0,100,20)) +
+  theme_light() +
+  theme(axis.title.y = element_blank()) + 
+  theme(axis.title.x = element_blank()) +
+  theme(legend.title = element_text(size = 10))
+
+grafico2 <- banco %>% 
+  group_by(Grupo, `Realizar outra viagem pelo audiovisual`) %>%
+  summarise(Quantidade=n()) %>% 
+  group_by(Grupo) %>% 
+  mutate(Percentual = percent(Quantidade/sum(Quantidade),1)) %>% 
+  na.omit() %>% 
+  ggplot(aes(x=Grupo, y=Percentual, 
+           fill=`Realizar outra viagem pelo audiovisual`, label = Percentual)) + 
+  geom_bar(stat = "identity",position = "dodge") +
+  geom_label(position = position_dodge(width = 1), show.legend = F, ) +
+  scale_fill_manual(name="Realizar outra viagem pelo audiovisual", values=c('#9cd1f0','#368196')) + coord_cartesian(ylim = c(0,1)) +
+  theme_light() +
+  theme(axis.title.y = element_blank()) + 
+  theme(axis.title.x = element_blank()) +
+  theme(legend.title = element_text(size = 10),
+        legend.position = "bottom") 
+
+
+plot_grid(grafico1, grafico2, ncol = 1)
+qui <- chisq.test(banco$Grupo, banco$`Realizar outra viagem pelo audiovisual`)[[3]]
+cat(paste0("Valor-p do teste qui-quadrado: ", round(qui, 4),". ", paste0(if_else(qui>0.05, "Como o valor-p é superior a 0.05, não rejeitamos a hipótese \nnula e acredita-se que as variáveis são independentes.", "Como o valor-p é inferior a 0.05, rejeitamos a hipótese nula\n e acredita-se que as variáveis estão associadas." ))))
+```
+
+### Gráfico 13: Consumo de produção audiovisual
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+result2[1:5,] %>% 
+  ggplot(aes(x=reorder(Variável, -Quantidade), y=Quantidade, label = Percentual)) + 
+  geom_bar(stat = "identity",position = "dodge", fill="#9cd1f0") +
+  geom_label(position = position_dodge(width = 1), show.legend = F, size=3) +
+  scale_y_continuous(breaks = seq(0,100,10)) +
+  theme_light() +
+  theme(axis.title.y = element_blank()) + 
+  theme(axis.title.x = element_blank()) +
+  theme(legend.title = element_text(size = 10))
+```
+
+Entre os que citaram "Outro audiovisual", descreveram: documentários,
+curtas, propagandas criativas, produtores de conteúdo nas redes sociais.
+
+```{r, echo = FALSE, include = FALSE}
+data <- banco[,c(7,13:17)]
+n <- length(names(data))
+
+nome <- names(data)
+
+lista <- list()
+
+for (i in 1:(n-1)) {
+  data[,i+1] <- as.factor(data[,i+1])
+  resumo <- data %>% 
+    group_by(data[1], data[1+i]) %>% 
+    summarise(Quantidade=n())
+  lista[[i]] <- resumo
+}
+
+
+graficos1 <- lista[[1]] %>% 
+  group_by(Grupo) %>% 
+  mutate(Percentual = percent(Quantidade/sum(Quantidade),1)) %>% 
+  ungroup() %>% 
+  ggplot(aes(x=Grupo, y=Percentual, label = Percentual, fill = Filmes)) + 
+  geom_bar(stat = "identity", position = "dodge") +
+  geom_label(position = position_dodge(width = 1), show.legend = F) +
+  scale_fill_manual(name="Filmes", values=c('#9cd1f0','#368196'), 
+                    labels = c("1" = "Sim", "0" = "Não")) +
+  coord_cartesian(ylim = c(0,1)) +
+  theme_light() + 
+  theme(axis.title.y = element_blank()) + 
+  theme(axis.title.x = element_blank()) + 
+  theme(legend.title = element_text(size = 10)) 
+
+
+graficos2 <- lista[[2]] %>% 
+  group_by(Grupo) %>% 
+  mutate(Percentual = percent(Quantidade/sum(Quantidade),1)) %>% 
+  ungroup() %>% 
+  ggplot(aes(x=Grupo, y=Percentual, label = Percentual, fill = Novelas)) + 
+  geom_bar(stat = "identity", position = "dodge") +
+  geom_label(position = position_dodge(width = 1), show.legend = F) +
+  coord_cartesian(ylim = c(0,1)) +
+  scale_fill_manual(name="Novelas", values=c('#9cd1f0','#368196'), 
+                    labels = c("1" = "Sim", "0" = "Não")) +
+  theme_light() + 
+  theme(axis.title.y = element_blank()) + 
+  theme(axis.title.x = element_blank()) + 
+  theme(legend.title = element_text(size = 10)) 
+
+
+graficos3 <- lista[[3]] %>% 
+  group_by(Grupo) %>% 
+  mutate(Percentual = percent(Quantidade/sum(Quantidade),1)) %>% 
+  ungroup() %>% 
+  ggplot(aes(x=Grupo, y=Percentual, label = Percentual, fill = Seriados)) + 
+  geom_bar(stat = "identity", position = "dodge") +
+  geom_label(position = position_dodge(width = 1), show.legend = F) +
+  scale_fill_manual(name="Seriados", values=c('#9cd1f0','#368196'), 
+                    labels = c("1" = "Sim", "0" = "Não")) +
+  coord_cartesian(ylim = c(0,1)) +
+  theme_light() + 
+  theme(axis.title.y = element_blank()) + 
+  theme(axis.title.x = element_blank()) + 
+  theme(legend.title = element_text(size = 10)) 
+
+
+graficos4<- lista[[4]] %>% 
+  group_by(Grupo) %>% 
+  mutate(Percentual = percent(Quantidade/sum(Quantidade),1)) %>% 
+  ungroup() %>% 
+  ggplot(aes(x=Grupo, y=Percentual, label = Percentual, fill = `Clipes de música`)) + 
+  geom_bar(stat = "identity", position = "dodge") +
+  geom_label(position = position_dodge(width = 1), show.legend = F) +
+  scale_fill_manual(name="Clipes de música", values=c('#9cd1f0','#368196'), 
+                    labels = c("1" = "Sim", "0" = "Não")) +
+  coord_cartesian(ylim = c(0,1)) +
+  theme_light() + 
+  theme(axis.title.y = element_blank()) + 
+  theme(axis.title.x = element_blank()) + 
+  theme(legend.title = element_text(size = 10)) 
+
+
+graficos5 <- lista[[5]] %>% 
+  group_by(Grupo) %>% 
+  mutate(Percentual = percent(Quantidade/sum(Quantidade),1)) %>% 
+  ungroup() %>% 
+  ggplot(aes(x=Grupo, y=Percentual, label = Percentual, fill = `Outro audiovisual`)) + 
+  geom_bar(stat = "identity", position = "dodge") +
+  geom_label(position = position_dodge(width = 1), show.legend = F) +
+  scale_fill_manual(name="Outro audiovisual", values=c('#9cd1f0','#368196'), 
+                    labels = c("1" = "Sim", "0" = "Não")) +
+  coord_cartesian(ylim = c(0,1)) +
+  theme_light() + 
+  theme(axis.title.y = element_blank()) + 
+  theme(axis.title.x = element_blank()) + 
+  theme(legend.title = element_text(size = 10))
+```
+
+### Gráfico 14: Turistas que assistem filmes por grupo
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+graficos1
+qui <- chisq.test(data[,1], data[,2])[[3]] #Estão associadas
+cat(paste0("Valor-p do teste qui-quadrado: ", round(qui, 4),". ", paste0(if_else(qui>0.05, "Como o valor-p é superior a 0.05, não rejeitamos a hipótese \nnula e acredita-se que as variáveis são independentes.", "Como o valor-p é inferior a 0.05, rejeitamos a hipótese nula\n e acredita-se que as variáveis estão associadas." ))))
+```
+
+### Gráfico 15: Turistas que assistem novelas por grupo
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+graficos2
+qui <- chisq.test(data[,1], data[,3])[[3]]
+cat(paste0("Valor-p do teste qui-quadrado: ", round(qui, 4),". ", paste0(if_else(qui>0.05, "Como o valor-p é superior a 0.05, não rejeitamos a hipótese \nnula e acredita-se que as variáveis são independentes.", "Como o valor-p é inferior a 0.05, rejeitamos a hipótese nula\n e acredita-se que as variáveis estão associadas." ))))
+```
+
+### Gráfico 16: Turistas que assistem seriados por grupo
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+graficos3
+qui <- chisq.test(data[,1], data[,4])[[3]]
+cat(paste0("Valor-p do teste qui-quadrado: ", round(qui, 4),". ", paste0(if_else(qui>0.05, "Como o valor-p é superior a 0.05, não rejeitamos a hipótese \nnula e acredita-se que as variáveis são independentes.", "Como o valor-p é inferior a 0.05, rejeitamos a hipótese nula\n e acredita-se que as variáveis estão associadas." ))))
+```
+
+### Gráfico 17: Turistas que assistem clipes de música por grupo
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+graficos4
+qui <- chisq.test(data[,1], data[,5])[[3]]
+cat(paste0("Valor-p do teste qui-quadrado: ", round(qui, 4),". ", paste0(if_else(qui>0.05, "Como o valor-p é superior a 0.05, não rejeitamos a hipótese \nnula e acredita-se que as variáveis são independentes.", "Como o valor-p é inferior a 0.05, rejeitamos a hipótese nula\n e acredita-se que as variáveis estão associadas." ))))
+```
+
+### Gráfico 18: Turistas que assistem outro produto audiovisual por grupo
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+graficos5
+qui <- chisq.test(data[,1], data[,6])[[3]]
+cat(paste0("Valor-p do teste qui-quadrado: ", round(qui, 4),". ", paste0(if_else(qui>0.05, "Como o valor-p é superior a 0.05, não rejeitamos a hipótese \nnula e acredita-se que as variáveis são independentes.", "Como o valor-p é inferior a 0.05, rejeitamos a hipótese nula\n e acredita-se que as variáveis estão associadas." ))))
+```
+
+### Gráfico 19: Produção audiovisual consumida pelos turistas
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+
+result2[6:14,] %>% 
+  ggplot(aes(x=reorder(Variável, -Quantidade), y=Quantidade, label = Percentual)) + 
+  geom_bar(stat = "identity",position = "dodge", fill="#9cd1f0") +
+  geom_label(position = position_dodge(width = 1), show.legend = F, size=3) +
+  scale_y_continuous(breaks = seq(0,100,10)) +
+  theme_light() +
+  theme(axis.title.y = element_blank()) + 
+  theme(axis.title.x = element_blank()) +
+  theme(legend.title = element_text(size = 10)) +
+  theme(axis.text.x = element_text(angle = -10, vjust = 0.5, hjust=0.5))
+
+```
+
+Entre os que citaram "Outros streaming", descreveram: Pluto TV, Apple
+TV, Hulu, My Família TV.
+
+```{r, echo = FALSE, include = FALSE}
+data <- banco[,c(7,18:26)]
+n <- length(names(data))
+
+nome <- names(data)
+
+lista <- list()
+
+for (i in 1:(n-1)) {
+  data[,i+1] <- as.factor(data[,i+1])
+  resumo <- data %>% 
+    group_by(data[1], data[1+i]) %>% 
+    summarise(Quantidade=n())
+  lista[[i]] <- resumo
+}
+
+
+graficos1 <- lista[[1]] %>% 
+  group_by(Grupo) %>% 
+  mutate(Percentual = percent(Quantidade/sum(Quantidade),1)) %>% 
+  ggplot(aes(x=Grupo, y=Percentual, label = Percentual, fill = `Netflix`)) + 
+  geom_bar(stat = "identity", position = "dodge") +
+  geom_label(position = position_dodge(width = 1), show.legend = F) +
+  scale_fill_manual(name="Netflix", values=c('#9cd1f0','#368196'), 
+                    labels = c("1" = "Sim", "0" = "Não")) +
+  coord_cartesian(ylim = c(0,1)) +
+  theme_light() + 
+  theme(axis.title.y = element_blank()) + 
+  theme(axis.title.x = element_blank()) + 
+  theme(legend.title = element_text(size = 10)) 
+
+
+graficos2 <- lista[[2]] %>% 
+  group_by(Grupo) %>% 
+  mutate(Percentual = percent(Quantidade/sum(Quantidade),1)) %>% 
+  ggplot(aes(x=Grupo, y=Percentual, label = Percentual, fill = `Globoplay`)) + 
+  geom_bar(stat = "identity", position = "dodge") +
+  geom_label(position = position_dodge(width = 1), show.legend = F) +
+  scale_fill_manual(name="Globoplay", values=c('#9cd1f0','#368196'), 
+                    labels = c("1" = "Sim", "0" = "Não")) +
+  coord_cartesian(ylim = c(0,1)) +
+  theme_light() + 
+  theme(axis.title.y = element_blank()) + 
+  theme(axis.title.x = element_blank()) + 
+  theme(legend.title = element_text(size = 10)) 
+
+
+graficos3 <- lista[[3]] %>% 
+  group_by(Grupo) %>% 
+  mutate(Percentual = percent(Quantidade/sum(Quantidade),1)) %>% 
+  ggplot(aes(x=Grupo, y=Percentual, label = Percentual, fill = `Amazon Prime Vídeo`)) + 
+  geom_bar(stat = "identity", position = "dodge") +
+  geom_label(position = position_dodge(width = 1), show.legend = F) +
+  scale_fill_manual(name="Amazon Prime Vídeo", values=c('#9cd1f0','#368196'), 
+                    labels = c("1" = "Sim", "0" = "Não")) +
+  coord_cartesian(ylim = c(0,1)) +
+  theme_light() + 
+  theme(axis.title.y = element_blank()) + 
+  theme(axis.title.x = element_blank()) + 
+  theme(legend.title = element_text(size = 10)) 
+
+
+graficos4<- lista[[4]] %>% 
+  group_by(Grupo) %>% 
+  mutate(Percentual = percent(Quantidade/sum(Quantidade),1)) %>% 
+  ggplot(aes(x=Grupo, y=Percentual, label = Percentual, fill = `HBO Max`)) + 
+  geom_bar(stat = "identity", position = "dodge") +
+  geom_label(position = position_dodge(width = 1), show.legend = F) +
+  scale_fill_manual(name="HBO Max", values=c('#9cd1f0','#368196'), 
+                    labels = c("1" = "Sim", "0" = "Não")) +
+  coord_cartesian(ylim = c(0,1)) +
+  theme_light() + 
+  theme(axis.title.y = element_blank()) + 
+  theme(axis.title.x = element_blank()) + 
+  theme(legend.title = element_text(size = 10)) 
+
+
+graficos5 <- lista[[5]] %>% 
+  group_by(Grupo) %>% 
+  mutate(Percentual = percent(Quantidade/sum(Quantidade),1)) %>% 
+  ggplot(aes(x=Grupo, y=Percentual, label = Percentual, fill = `Disney+`)) + 
+  geom_bar(stat = "identity", position = "dodge") +
+  geom_label(position = position_dodge(width = 1), show.legend = F) +
+  scale_fill_manual(name="Disney+", values=c('#9cd1f0','#368196'), 
+                    labels = c("1" = "Sim", "0" = "Não")) +
+  coord_cartesian(ylim = c(0,1)) +
+  theme_light() + 
+  theme(axis.title.y = element_blank()) + 
+  theme(axis.title.x = element_blank()) + 
+  theme(legend.title = element_text(size = 10))
+
+
+graficos6 <- lista[[6]] %>% 
+  group_by(Grupo) %>% 
+  mutate(Percentual = percent(Quantidade/sum(Quantidade),1)) %>% 
+  ggplot(aes(x=Grupo, y=Percentual, label = Percentual, fill = Telecine)) + 
+  geom_bar(stat = "identity", position = "dodge") +
+  geom_label(position = position_dodge(width = 1), show.legend = F) +
+  scale_fill_manual(name="Telecine", values=c('#9cd1f0','#368196'), 
+                    labels = c("1" = "Sim", "0" = "Não")) +
+  coord_cartesian(ylim = c(0,1)) +
+  theme_light() + 
+  theme(axis.title.y = element_blank()) + 
+  theme(axis.title.x = element_blank()) + 
+  theme(legend.title = element_text(size = 10))
+
+
+graficos7 <- lista[[7]] %>% 
+  group_by(Grupo) %>% 
+  mutate(Percentual = percent(Quantidade/sum(Quantidade),1)) %>% 
+  ggplot(aes(x=Grupo, y=Percentual, label = Percentual, fill = `Star+`)) + 
+  geom_bar(stat = "identity", position = "dodge") +
+  geom_label(position = position_dodge(width = 1), show.legend = F) +
+  scale_fill_manual(name="Star+", values=c('#9cd1f0','#368196'), 
+                    labels = c("1" = "Sim", "0" = "Não")) +
+  coord_cartesian(ylim = c(0,1)) +
+  theme_light() + 
+  theme(axis.title.y = element_blank()) + 
+  theme(axis.title.x = element_blank()) + 
+  theme(legend.title = element_text(size = 10))
+
+
+graficos8 <- lista[[8]] %>% 
+  group_by(Grupo) %>% 
+  mutate(Percentual = percent(Quantidade/sum(Quantidade),1)) %>% 
+  ggplot(aes(x=Grupo, y=Percentual, label = Percentual, fill = Viki)) + 
+  geom_bar(stat = "identity", position = "dodge") +
+  geom_label(position = position_dodge(width = 1), show.legend = F) +
+  scale_fill_manual(name="Viki", values=c('#9cd1f0','#368196'), 
+                    labels = c("1" = "Sim", "0" = "Não")) +
+  coord_cartesian(ylim = c(0,1)) +
+  theme_light() + 
+  theme(axis.title.y = element_blank()) + 
+  theme(axis.title.x = element_blank()) + 
+  theme(legend.title = element_text(size = 10))
+
+
+graficos9 <- lista[[9]] %>% 
+  group_by(Grupo) %>% 
+  mutate(Percentual = percent(Quantidade/sum(Quantidade),1)) %>% 
+  ggplot(aes(x=Grupo, y=Percentual, label = Percentual, fill = `Outros streamig`)) + 
+  geom_bar(stat = "identity", position = "dodge") +
+  geom_label(position = position_dodge(width = 1), show.legend = F) +
+  scale_fill_manual(name="Outros streamig", values=c('#9cd1f0','#368196'), 
+                    labels = c("1" = "Sim", "0" = "Não")) +
+  coord_cartesian(ylim = c(0,1)) +
+  theme_light() + 
+  theme(axis.title.y = element_blank()) + 
+  theme(axis.title.x = element_blank()) + 
+  theme(legend.title = element_text(size = 10))
+
+
+```
+
+### Gráfico 20: Turistas que assinam Netflix por grupo
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+graficos1
+qui <- chisq.test(data[,1], data[,2])[[3]] #Estão associadas
+cat(paste0("Valor-p do teste qui-quadrado: ", round(qui, 4),". ", paste0(if_else(qui>0.05, "Como o valor-p é superior a 0.05, não rejeitamos a hipótese \nnula e acredita-se que as variáveis são independentes.", "Como o valor-p é inferior a 0.05, rejeitamos a hipótese nula\n e acredita-se que as variáveis estão associadas." ))))
+```
+
+### Gráfico 21: Turistas que assinam Globoplay por grupo
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+graficos2
+qui <- chisq.test(data[,1], data[,3])[[3]]
+cat(paste0("Valor-p do teste qui-quadrado: ", round(qui, 4),". ", paste0(if_else(qui>0.05, "Como o valor-p é superior a 0.05, não rejeitamos a hipótese \nnula e acredita-se que as variáveis são independentes.", "Como o valor-p é inferior a 0.05, rejeitamos a hipótese nula\n e acredita-se que as variáveis estão associadas." ))))
+```
+
+### Gráfico 22: Turistas que assinam Amazon Prime Video por grupo
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+graficos3
+qui <- chisq.test(data[,1], data[,4])[[3]]
+cat(paste0("Valor-p do teste qui-quadrado: ", round(qui, 4),". ", paste0(if_else(qui>0.05, "Como o valor-p é superior a 0.05, não rejeitamos a hipótese \nnula e acredita-se que as variáveis são independentes.", "Como o valor-p é inferior a 0.05, rejeitamos a hipótese nula\n e acredita-se que as variáveis estão associadas." ))))
+```
+
+### Gráfico 23: Turistas que assinam HBO Max por grupo
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+graficos4
+qui <- chisq.test(data[,1], data[,5])[[3]]
+cat(paste0("Valor-p do teste qui-quadrado: ", round(qui, 4),". ", paste0(if_else(qui>0.05, "Como o valor-p é superior a 0.05, não rejeitamos a hipótese \nnula e acredita-se que as variáveis são independentes.", "Como o valor-p é inferior a 0.05, rejeitamos a hipótese nula\n e acredita-se que as variáveis estão associadas." ))))
+```
+
+### Gráfico 24: Turistas que assinam Disney+ por grupo
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+graficos5
+qui <- chisq.test(data[,1], data[,6])[[3]]
+cat(paste0("Valor-p do teste qui-quadrado: ", round(qui, 4),". ", paste0(if_else(qui>0.05, "Como o valor-p é superior a 0.05, não rejeitamos a hipótese \nnula e acredita-se que as variáveis são independentes.", "Como o valor-p é inferior a 0.05, rejeitamos a hipótese nula\n e acredita-se que as variáveis estão associadas." ))))
+```
+
+### Gráfico 25: Turistas que assinam Telecine por grupo
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+graficos6
+qui <- chisq.test(data[,1], data[,7])[[3]]
+cat(paste0("Valor-p do teste qui-quadrado: ", round(qui, 4),". ", paste0(if_else(qui>0.05, "Como o valor-p é superior a 0.05, não rejeitamos a hipótese \nnula e acredita-se que as variáveis são independentes.", "Como o valor-p é inferior a 0.05, rejeitamos a hipótese nula\n e acredita-se que as variáveis estão associadas." ))))
+```
+
+### Gráfico 26: Turistas que assinam Star+ por grupo
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+graficos7
+qui <- chisq.test(data[,1], data[,8])[[3]]
+cat(paste0("Valor-p do teste qui-quadrado: ", round(qui, 4),". ", paste0(if_else(qui>0.05, "Como o valor-p é superior a 0.05, não rejeitamos a hipótese \nnula e acredita-se que as variáveis são independentes.", "Como o valor-p é inferior a 0.05, rejeitamos a hipótese nula\n e acredita-se que as variáveis estão associadas." ))))
+```
+
+### Gráfico 27: Turistas que assinam Viki por grupo
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+graficos8
+qui <- chisq.test(data[,1], data[,9])[[3]]
+cat(paste0("Valor-p do teste qui-quadrado: ", round(qui, 4),". ", paste0(if_else(qui>0.05, "Como o valor-p é superior a 0.05, não rejeitamos a hipótese \nnula e acredita-se que as variáveis são independentes.", "Como o valor-p é inferior a 0.05, rejeitamos a hipótese nula\n e acredita-se que as variáveis estão associadas." ))))
+```
+
+### Gráfico 28: Turistas que assinam Outros streamig por grupo
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+graficos9
+qui <- chisq.test(data[,1], data[,10])[[3]]
+cat(paste0("Valor-p do teste qui-quadrado: ", round(qui, 4),". ", paste0(if_else(qui>0.05, "Como o valor-p é superior a 0.05, não rejeitamos a hipótese \nnula e acredita-se que as variáveis são independentes.", "Como o valor-p é inferior a 0.05, rejeitamos a hipótese nula\n e acredita-se que as variáveis estão associadas." ))))
+```
+
+Precisa fazer a mesma coisa feita do result2 para as demais...
+
+### Gráfico 29: Atividade de lazer relacionada ao audiovisual realizada pelos turistas
+
+```{r, fig.width=10, fig.height=8, echo=FALSE, message=FALSE, warning=FALSE}
+result2[15:23,] %>% 
+  ggplot(aes(x=reorder(Variável, -Quantidade), y=Quantidade, label = Percentual, fill = reorder(Variável, -Quantidade))) + 
+  geom_bar(stat = "identity") +
+  geom_label(position = position_dodge(width = 1), show.legend = F, size=3) +
+  labs(x = NULL) +
+  scale_y_continuous(breaks = seq(0,115,10)) +
+  scale_fill_manual(name="Atividades de lazer", values=c('#368142','#368196',"#69b3a2", "#69b3e2", "#01d8a2","#9cd1f0", "#30b3a2", '#9cd2d0', '#595550')) +
+  theme_light() +
+  theme(axis.title.y = element_blank()) + 
+  theme(axis.text.x = element_blank()) +
+  theme(axis.title.x = element_blank()) +
+  theme(legend.title = element_text(size = 10)) +
+  theme(legend.position = c(0.7,0.83))
+```
+
+```{r, echo = FALSE, include = FALSE}
+data <- banco[,c(7,27:35)]
+n <- length(names(data))
+
+nome <- names(data)
+
+lista <- list()
+
+for (i in 1:(n-1)) {
+  data[,i+1] <- as.factor(data[,i+1])
+  resumo <- data %>% 
+    group_by(data[1], data[1+i]) %>% 
+    summarise(Quantidade=n()) %>% 
+    na.omit() 
+  lista[[i]] <- resumo
+}
+
+
+graficos1 <- lista[[1]] %>% 
+  group_by(Grupo) %>% 
+  mutate(Percentual = percent(Quantidade/sum(Quantidade),1)) %>% 
+  ggplot(aes(x=Grupo, y=Percentual, label = Percentual, fill = `Visita a parques, praças e espaços na natureza exibidos na tela`)) + 
+  geom_bar(stat = "identity", position = "dodge") +
+  geom_label(position = position_dodge(width = 1), show.legend = F) +
+  scale_fill_manual(values=c('#9cd1f0','#368196'), 
+                    labels = c("1" = "Sim", "0" = "Não")) +
+  coord_cartesian(ylim = c(0,1)) +
+  theme_light() + 
+  theme(axis.title.y = element_blank()) + 
+  theme(axis.title.x = element_blank()) + 
+  theme(legend.title = element_text(size = 10),
+        legend.position = "bottom") 
+
+
+graficos2 <- lista[[2]] %>% 
+  group_by(Grupo) %>% 
+  mutate(Percentual = percent(Quantidade/sum(Quantidade),1)) %>% 
+  ggplot(aes(x=Grupo, y=Percentual, label = Percentual, fill = `Visita a Parques temáticos baseados em atrações inspiradas em séries, filmes, etc`)) + 
+  geom_bar(stat = "identity", position = "dodge") +
+  geom_label(position = position_dodge(width = 1), show.legend = F) +
+  scale_fill_manual(values=c('#9cd1f0','#368196'), 
+                    labels = c("1" = "Sim", "0" = "Não")) +
+  coord_cartesian(ylim = c(0,1)) +
+  theme_light() + 
+  theme(axis.title.y = element_blank()) + 
+  theme(axis.title.x = element_blank()) + 
+  theme(legend.title = element_text(size = 10),
+        legend.position = "bottom")
+
+graficos3 <- lista[[3]] %>% 
+  group_by(Grupo) %>% 
+  mutate(Percentual = percent(Quantidade/sum(Quantidade),1)) %>% 
+  ggplot(aes(x=Grupo, y=Percentual, label = Percentual, fill = `Visita a cenários internos ou externos onde foram filmadas`)) + 
+  geom_bar(stat = "identity", position = "dodge") +
+  geom_label(position = position_dodge(width = 1), show.legend = F) +
+  scale_fill_manual(values=c('#9cd1f0','#368196'), 
+                    labels = c("1" = "Sim", "0" = "Não")) +
+  coord_cartesian(ylim = c(0,1)) +
+  theme_light() + 
+  theme(axis.title.y = element_blank()) + 
+  theme(axis.title.x = element_blank()) + 
+  theme(legend.title = element_text(size = 10),
+        legend.position = "bottom")
+
+graficos4 <- lista[[4]] %>% 
+  group_by(Grupo) %>% 
+  mutate(Percentual = percent(Quantidade/sum(Quantidade),1)) %>% 
+  ggplot(aes(x=Grupo, y=Percentual, label = Percentual, fill = `Desfrute da gastronomia retratada na tela, incluindo alimentos e bebidas`)) + 
+  geom_bar(stat = "identity", position = "dodge") +
+  geom_label(position = position_dodge(width = 1), show.legend = F) +
+  scale_fill_manual(values=c('#9cd1f0','#368196'), 
+                    labels = c("1" = "Sim", "0" = "Não")) +
+  coord_cartesian(ylim = c(0,1)) +
+  theme_light() + 
+  theme(axis.title.y = element_blank()) + 
+  theme(axis.title.x = element_blank()) + 
+  theme(legend.title = element_text(size = 10),
+        legend.position = "bottom")
+
+graficos5 <- lista[[5]] %>% 
+  group_by(Grupo) %>% 
+  mutate(Percentual = percent(Quantidade/sum(Quantidade),1)) %>% 
+  ggplot(aes(x=Grupo, y=Percentual, label = Percentual, fill = `Participação em eventos relacionados a filmes`)) + 
+  geom_bar(stat = "identity", position = "dodge") +
+  geom_label(position = position_dodge(width = 1), show.legend = F) +
+  scale_fill_manual(values=c('#9cd1f0','#368196'), 
+                    labels = c("1" = "Sim", "0" = "Não")) +
+  coord_cartesian(ylim = c(0,1)) +
+  theme_light() + 
+  theme(axis.title.y = element_blank()) + 
+  theme(axis.title.x = element_blank()) + 
+  theme(legend.title = element_text(size = 10),
+        legend.position = "bottom")
+
+
+graficos6 <- lista[[6]] %>% 
+  group_by(Grupo) %>% 
+  mutate(Percentual = percent(Quantidade/sum(Quantidade),1)) %>% 
+  ggplot(aes(x=Grupo, y=Percentual, label = Percentual, fill = `Visita a estabelecimentos exibidos na tela, como bares, restaurantes e outros`)) + 
+  geom_bar(stat = "identity", position = "dodge") +
+  geom_label(position = position_dodge(width = 1), show.legend = F) +
+  scale_fill_manual(values=c('#9cd1f0','#368196'), 
+                    labels = c("1" = "Sim", "0" = "Não")) +
+  coord_cartesian(ylim = c(0,1)) +
+  theme_light() + 
+  theme(axis.title.y = element_blank()) + 
+  theme(axis.title.x = element_blank()) + 
+  theme(legend.title = element_text(size = 10),
+        legend.text = element_text(size = 8),
+        legend.key.size = unit(0.4, 'cm'),
+        legend.position = "bottom")
+
+
+graficos7 <- lista[[7]] %>% 
+  group_by(Grupo) %>% 
+  mutate(Percentual = percent(Quantidade/sum(Quantidade),1)) %>% 
+  ggplot(aes(x=Grupo, y=Percentual, label = Percentual, fill = `Realização de roteiros guiados em locais de filmagem`)) + 
+  geom_bar(stat = "identity", position = "dodge") +
+  geom_label(position = position_dodge(width = 1), show.legend = F) +
+  scale_fill_manual(values=c('#9cd1f0','#368196'), 
+                    labels = c("1" = "Sim", "0" = "Não")) +
+  coord_cartesian(ylim = c(0,1)) +
+  theme_light() + 
+  theme(axis.title.y = element_blank()) + 
+  theme(axis.title.x = element_blank()) + 
+  theme(legend.title = element_text(size = 10),
+        legend.position = "bottom")
+
+
+graficos8 <- lista[[8]] %>% 
+  group_by(Grupo) %>% 
+  mutate(Percentual = percent(Quantidade/sum(Quantidade),1)) %>% 
+  ggplot(aes(x=Grupo, y=Percentual, label = Percentual, fill = `Outra atividade`)) + 
+  geom_bar(stat = "identity", position = "dodge") +
+  geom_label(position = position_dodge(width = 1), show.legend = F) +
+  scale_fill_manual(values=c('#9cd1f0','#368196'), 
+                    labels = c("1" = "Sim", "0" = "Não")) +
+  coord_cartesian(ylim = c(0,1)) +
+  theme_light() + 
+  theme(axis.title.y = element_blank()) + 
+  theme(axis.title.x = element_blank()) + 
+  theme(legend.title = element_text(size = 10),
+        legend.position = "bottom")
+
+
+graficos9 <- lista[[9]] %>% 
+  group_by(Grupo) %>% 
+  mutate(Percentual = percent(Quantidade/sum(Quantidade),1)) %>% 
+  ggplot(aes(x=Grupo, y=Percentual, label = Percentual, fill = `Visita a patrimônios culturais exibidos na tela`)) + 
+  geom_bar(stat = "identity", position = "dodge") +
+  geom_label(position = position_dodge(width = 1), show.legend = F) +
+  scale_fill_manual(values=c('#9cd1f0','#368196'), 
+                    labels = c("1" = "Sim", "0" = "Não")) +
+  coord_cartesian(ylim = c(0,1)) +
+  theme_light() + 
+  theme(axis.title.y = element_blank()) + 
+  theme(axis.title.x = element_blank()) + 
+  theme(legend.title = element_text(size = 10),
+        legend.position = "bottom")
+
+
+```
+
+### Gráfico 30: Turistas que realizaram a atividade Visita a parques, praças e espaços na natureza exibidos na tela por grupo
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+graficos1
+qui <- chisq.test(data[,1], data[,2])[[3]] #Estão associadas
+cat(paste0("Valor-p do teste qui-quadrado: ", round(qui, 4),". ", paste0(if_else(qui>0.05, "Como o valor-p é superior a 0.05, não rejeitamos a hipótese \nnula e acredita-se que as variáveis são independentes.", "Como o valor-p é inferior a 0.05, rejeitamos a hipótese nula\n e acredita-se que as variáveis estão associadas." ))))
+```
+
+### Gráfico 31: Turistas que realizaram a atividade Visita a Parques temáticos baseados em atrações inspiradas em séries, filmes, etc por grupo
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+graficos2
+qui <- chisq.test(data[,1], data[,3])[[3]]
+cat(paste0("Valor-p do teste qui-quadrado: ", round(qui, 4),". ", paste0(if_else(qui>0.05, "Como o valor-p é superior a 0.05, não rejeitamos a hipótese \nnula e acredita-se que as variáveis são independentes.", "Como o valor-p é inferior a 0.05, rejeitamos a hipótese nula\n e acredita-se que as variáveis estão associadas." ))))
+```
+
+### Gráfico 32: Turistas que realizaram a atividade Visita a cenários internos ou externos onde foram filmadas por grupo
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+graficos3
+qui <- chisq.test(data[,1], data[,4])[[3]]
+cat(paste0("Valor-p do teste qui-quadrado: ", round(qui, 4),". ", paste0(if_else(qui>0.05, "Como o valor-p é superior a 0.05, não rejeitamos a hipótese \nnula e acredita-se que as variáveis são independentes.", "Como o valor-p é inferior a 0.05, rejeitamos a hipótese nula\n e acredita-se que as variáveis estão associadas." ))))
+```
+
+### Gráfico 33: Turistas que realizaram a atividade Desfrute da gastronomia retratada na tela, incluindo alimentos e bebidas por grupo
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+graficos4
+qui <- chisq.test(data[,1], data[,5])[[3]]
+cat(paste0("Valor-p do teste qui-quadrado: ", round(qui, 4),". ", paste0(if_else(qui>0.05, "Como o valor-p é superior a 0.05, não rejeitamos a hipótese \nnula e acredita-se que as variáveis são independentes.", "Como o valor-p é inferior a 0.05, rejeitamos a hipótese nula\n e acredita-se que as variáveis estão associadas." ))))
+```
+
+### Gráfico 34: Turistas que realizaram a atividade Participação em eventos relacionados a filmes por grupo
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+graficos5
+qui <- chisq.test(data[,1], data[,6])[[3]]
+cat(paste0("Valor-p do teste qui-quadrado: ", round(qui, 4),". ", paste0(if_else(qui>0.05, "Como o valor-p é superior a 0.05, não rejeitamos a hipótese \nnula e acredita-se que as variáveis são independentes.", "Como o valor-p é inferior a 0.05, rejeitamos a hipótese nula\n e acredita-se que as variáveis estão associadas." ))))
+```
+
+### Gráfico 35: Turistas que realizaram a atividade Visita a estabelecimentos exibidos na tela, como bares, restaurantes e outros por grupo
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+graficos6
+qui <- chisq.test(data[,1], data[,7])[[3]]
+cat(paste0("Valor-p do teste qui-quadrado: ", round(qui, 4),". ", paste0(if_else(qui>0.05, "Como o valor-p é superior a 0.05, não rejeitamos a hipótese \nnula e acredita-se que as variáveis são independentes.", "Como o valor-p é inferior a 0.05, rejeitamos a hipótese nula\n e acredita-se que as variáveis estão associadas." ))))
+```
+
+### Gráfico 36: Turistas que realizaram a atividade Realização de roteiros guiados em locais de filmagem por grupo
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+graficos7
+qui <- chisq.test(data[,1], data[,8])[[3]]
+cat(paste0("Valor-p do teste qui-quadrado: ", round(qui, 4),". ", paste0(if_else(qui>0.05, "Como o valor-p é superior a 0.05, não rejeitamos a hipótese \nnula e acredita-se que as variáveis são independentes.", "Como o valor-p é inferior a 0.05, rejeitamos a hipótese nula\n e acredita-se que as variáveis estão associadas." ))))
+```
+
+### Gráfico 37: Turistas que realizaram a atividade Outra atividade por grupo
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+graficos8
+qui <- chisq.test(data[,1], data[,9])[[3]]
+cat(paste0("Valor-p do teste qui-quadrado: ", round(qui, 4),". ", paste0(if_else(qui>0.05, "Como o valor-p é superior a 0.05, não rejeitamos a hipótese \nnula e acredita-se que as variáveis são independentes.", "Como o valor-p é inferior a 0.05, rejeitamos a hipótese nula\n e acredita-se que as variáveis estão associadas." ))))
+```
+
+### Gráfico 38: Turistas que realizaram a atividade Visita a patrimônios culturais exibidos na tela por grupo
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+graficos9
+qui <- chisq.test(data[,1], data[,10])[[3]]
+cat(paste0("Valor-p do teste qui-quadrado: ", round(qui, 4),". ", paste0(if_else(qui>0.05, "Como o valor-p é superior a 0.05, não rejeitamos a hipótese \nnula e acredita-se que as variáveis são independentes.", "Como o valor-p é inferior a 0.05, rejeitamos a hipótese nula\n e acredita-se que as variáveis estão associadas." ))))
+```
+
+### Gráfico 39: Produção audiovisual consumida pelos turistas
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+
+result2[24:30,] %>% 
+  ggplot(aes(x=reorder(Variável, -Quantidade), y=Quantidade, label = Percentual)) + 
+  geom_bar(stat = "identity",position = "dodge", fill="#9cd1f0") +
+  geom_label(position = position_dodge(width = 1), show.legend = F, size=3) +
+  scale_y_continuous(breaks = seq(0,100,10)) +
+  theme_light() +
+  theme(axis.title.y = element_blank()) + 
+  theme(axis.title.x = element_blank()) +
+  theme(legend.title = element_text(size = 10)) +
+  theme(axis.text.x = element_text(angle = -10, vjust = 0.5, hjust=0.5))
+
+```
+
+Entre os que citaram "Outros streaming", descreveram: Pluto TV, Apple
+TV, Hulu, My Família TV.
+
+```{r, echo = FALSE, include = FALSE}
+data <- banco[,c(7,36:43)]
+n <- length(names(data))
+
+nome <- names(data)
+
+lista <- list()
+
+for (i in 1:(n-1)) {
+  data[,i+1] <- as.factor(data[,i+1])
+  resumo <- data %>% 
+    group_by(data[1], data[1+i]) %>% 
+    summarise(Quantidade=n())
+  lista[[i]] <- resumo
+}
+
+
+graficos1 <- lista[[1]] %>% 
+  group_by(Grupo) %>% 
+  mutate(Percentual = percent(Quantidade/sum(Quantidade),1)) %>% 
+  ggplot(aes(x=Grupo, y=Percentual, label = Percentual, fill = Nostalgia)) + 
+  geom_bar(stat = "identity", position = "dodge") +
+  geom_label(position = position_dodge(width = 1), show.legend = F) +
+  scale_fill_manual(name="Nostalgia", values=c('#9cd1f0','#368196'), 
+                    labels = c("1" = "Sim", "0" = "Não")) +
+  coord_cartesian(ylim = c(0,1)) +
+  theme_light() + 
+  theme(axis.title.y = element_blank()) + 
+  theme(axis.title.x = element_blank()) + 
+  theme(legend.title = element_text(size = 10)) 
+
+
+graficos2 <- lista[[2]] %>% 
+  group_by(Grupo) %>% 
+  mutate(Percentual = percent(Quantidade/sum(Quantidade),1)) %>% 
+  ggplot(aes(x=Grupo, y=Percentual, label = Percentual, fill = Autorrealização)) + 
+  geom_bar(stat = "identity", position = "dodge") +
+  geom_label(position = position_dodge(width = 1), show.legend = F) +
+  scale_fill_manual(name="Autorrealização", values=c('#9cd1f0','#368196'), 
+                    labels = c("1" = "Sim", "0" = "Não")) +
+  coord_cartesian(ylim = c(0,1)) +
+  theme_light() + 
+  theme(axis.title.y = element_blank()) + 
+  theme(axis.title.x = element_blank()) + 
+  theme(legend.title = element_text(size = 10)) 
+
+
+graficos3 <- lista[[3]] %>% 
+  group_by(Grupo) %>% 
+  mutate(Percentual = percent(Quantidade/sum(Quantidade),1)) %>% 
+  ggplot(aes(x=Grupo, y=Percentual, label = Percentual, fill = `Escapismo da realidade`)) + 
+  geom_bar(stat = "identity", position = "dodge") +
+  geom_label(position = position_dodge(width = 1), show.legend = F) +
+  scale_fill_manual(name="Escapismo da realidade", values=c('#9cd1f0','#368196'), 
+                    labels = c("1" = "Sim", "0" = "Não")) +
+  coord_cartesian(ylim = c(0,1)) +
+  theme_light() + 
+  theme(axis.title.y = element_blank()) + 
+  theme(axis.title.x = element_blank()) + 
+  theme(legend.title = element_text(size = 10)) 
+
+
+graficos4<- lista[[4]] %>% 
+  group_by(Grupo) %>% 
+  mutate(Percentual = percent(Quantidade/sum(Quantidade),1)) %>% 
+  ggplot(aes(x=Grupo, y=Percentual, label = Percentual, fill = `Fantasia`)) + 
+  geom_bar(stat = "identity", position = "dodge") +
+  geom_label(position = position_dodge(width = 1), show.legend = F) +
+  scale_fill_manual(name="Fantasia", values=c('#9cd1f0','#368196'), 
+                    labels = c("1" = "Sim", "0" = "Não")) +
+  coord_cartesian(ylim = c(0,1)) +
+  theme_light() + 
+  theme(axis.title.y = element_blank()) + 
+  theme(axis.title.x = element_blank()) + 
+  theme(legend.title = element_text(size = 10)) 
+
+
+graficos5 <- lista[[5]] %>% 
+  group_by(Grupo) %>% 
+  mutate(Percentual = percent(Quantidade/sum(Quantidade),1)) %>% 
+  ggplot(aes(x=Grupo, y=Percentual, label = Percentual, fill = `Encantamento`)) + 
+  geom_bar(stat = "identity", position = "dodge") +
+  geom_label(position = position_dodge(width = 1), show.legend = F) +
+  scale_fill_manual(name="Encantamento", values=c('#9cd1f0','#368196'), 
+                    labels = c("1" = "Sim", "0" = "Não")) +
+  coord_cartesian(ylim = c(0,1)) +
+  theme_light() + 
+  theme(axis.title.y = element_blank()) + 
+  theme(axis.title.x = element_blank()) + 
+  theme(legend.title = element_text(size = 10))
+
+
+graficos6 <- lista[[6]] %>% 
+  group_by(Grupo) %>% 
+  mutate(Percentual = percent(Quantidade/sum(Quantidade),1)) %>% 
+  ggplot(aes(x=Grupo, y=Percentual, label = Percentual, fill = Romance)) + 
+  geom_bar(stat = "identity", position = "dodge") +
+  geom_label(position = position_dodge(width = 1), show.legend = F) +
+  scale_fill_manual(name="Romance", values=c('#9cd1f0','#368196'), 
+                    labels = c("1" = "Sim", "0" = "Não")) +
+  coord_cartesian(ylim = c(0,1)) +
+  theme_light() + 
+  theme(axis.title.y = element_blank()) + 
+  theme(axis.title.x = element_blank()) + 
+  theme(legend.title = element_text(size = 10))
+
+
+graficos7 <- lista[[7]] %>% 
+  group_by(Grupo) %>% 
+  mutate(Percentual = percent(Quantidade/sum(Quantidade),1)) %>% 
+  ggplot(aes(x=Grupo, y=Percentual, label = Percentual, fill = `Superação de desafios`)) + 
+  geom_bar(stat = "identity", position = "dodge") +
+  geom_label(position = position_dodge(width = 1), show.legend = F) +
+  coord_cartesian(ylim = c(0,1)) +
+  scale_fill_manual(name="Superação de desafios", values=c('#9cd1f0','#368196'), 
+                    labels = c("1" = "Sim", "0" = "Não")) +
+  theme_light() + 
+  theme(axis.title.y = element_blank()) + 
+  theme(axis.title.x = element_blank()) + 
+  theme(legend.title = element_text(size = 10))
+
+
+graficos8 <- lista[[8]] %>% 
+  group_by(Grupo) %>% 
+  mutate(Percentual = percent(Quantidade/sum(Quantidade),1)) %>% 
+  ggplot(aes(x=Grupo, y=Percentual, label = Percentual, fill = `Outro sentimento`)) + 
+  geom_bar(stat = "identity", position = "dodge") +
+  geom_label(position = position_dodge(width = 1), show.legend = F) +
+  coord_cartesian(ylim = c(0,1)) +
+  scale_fill_manual(name="Outro sentimento", values=c('#9cd1f0','#368196'), 
+                    labels = c("1" = "Sim", "0" = "Não")) +
+  theme_light() + 
+  theme(axis.title.y = element_blank()) + 
+  theme(axis.title.x = element_blank()) + 
+  theme(legend.title = element_text(size = 10))
+
+```
+
+### Gráfico 40: Turistas que teve o sentimento nostalgia despertado durante a viagem por grupo
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+graficos1
+qui <- chisq.test(data[,1], data[,2])[[3]] 
+cat(paste0("Valor-p do teste qui-quadrado: ", round(qui, 4),". ", paste0(if_else(qui>0.05, "Como o valor-p é superior a 0.05, não rejeitamos a hipótese \nnula e acredita-se que as variáveis são independentes.", "Como o valor-p é inferior a 0.05, rejeitamos a hipótese nula\n e acredita-se que as variáveis estão associadas." ))))
+```
+
+### Gráfico 41: Turistas que teve o sentimento autorrealização despertado durante a viagem por grupo
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+graficos2
+qui <- chisq.test(data[,1], data[,3])[[3]]
+cat(paste0("Valor-p do teste qui-quadrado: ", round(qui, 4),". ", paste0(if_else(qui>0.05, "Como o valor-p é superior a 0.05, não rejeitamos a hipótese \nnula e acredita-se que as variáveis são independentes.", "Como o valor-p é inferior a 0.05, rejeitamos a hipótese nula\n e acredita-se que as variáveis estão associadas." ))))
+```
+
+### Gráfico 42: Turistas que teve o sentimento escapismo da realidade despertado durante a viagem por grupo
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+graficos3
+qui <- chisq.test(data[,1], data[,4])[[3]]
+cat(paste0("Valor-p do teste qui-quadrado: ", round(qui, 4),". ", paste0(if_else(qui>0.05, "Como o valor-p é superior a 0.05, não rejeitamos a hipótese \nnula e acredita-se que as variáveis são independentes.", "Como o valor-p é inferior a 0.05, rejeitamos a hipótese nula\n e acredita-se que as variáveis estão associadas." ))))
+```
+
+### Gráfico 43: Turistas que teve o sentimento fantasia despertado durante a viagem por grupo
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+graficos4
+qui <- chisq.test(data[,1], data[,5])[[3]]
+cat(paste0("Valor-p do teste qui-quadrado: ", round(qui, 4),". ", paste0(if_else(qui>0.05, "Como o valor-p é superior a 0.05, não rejeitamos a hipótese \nnula e acredita-se que as variáveis são independentes.", "Como o valor-p é inferior a 0.05, rejeitamos a hipótese nula\n e acredita-se que as variáveis estão associadas." ))))
+```
+
+### Gráfico 44: Turistas que teve o sentimento encantamento despertado durante a viagem por grupo
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+graficos5
+qui <- chisq.test(data[,1], data[,6])[[3]]
+cat(paste0("Valor-p do teste qui-quadrado: ", round(qui, 4),". ", paste0(if_else(qui>0.05, "Como o valor-p é superior a 0.05, não rejeitamos a hipótese \nnula e acredita-se que as variáveis são independentes.", "Como o valor-p é inferior a 0.05, rejeitamos a hipótese nula\n e acredita-se que as variáveis estão associadas." ))))
+```
+
+### Gráfico 45: Turistas que teve o sentimento romance despertado durante a viagem por grupo
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+graficos6
+qui <- chisq.test(data[,1], data[,7])[[3]]
+cat(paste0("Valor-p do teste qui-quadrado: ", round(qui, 4),". ", paste0(if_else(qui>0.05, "Como o valor-p é superior a 0.05, não rejeitamos a hipótese \nnula e acredita-se que as variáveis são independentes.", "Como o valor-p é inferior a 0.05, rejeitamos a hipótese nula\n e acredita-se que as variáveis estão associadas." ))))
+```
+
+### Gráfico 46: Turistas que teve o sentimento supeação de desafios despertados durante a viagem por grupo
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+graficos7
+qui <- chisq.test(data[,1], data[,8])[[3]]
+cat(paste0("Valor-p do teste qui-quadrado: ", round(qui, 4),". ", paste0(if_else(qui>0.05, "Como o valor-p é superior a 0.05, não rejeitamos a hipótese \nnula e acredita-se que as variáveis são independentes.", "Como o valor-p é inferior a 0.05, rejeitamos a hipótese nula\n e acredita-se que as variáveis estão associadas." ))))
+```
+
+### Gráfico 47: Turistas que teve o outros sentimentos despertados durante a viagem por grupo
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+graficos8
+qui <- chisq.test(data[,1], data[,9])[[3]]
+cat(paste0("Valor-p do teste qui-quadrado: ", round(qui, 4),". ", paste0(if_else(qui>0.05, "Como o valor-p é superior a 0.05, não rejeitamos a hipótese \nnula e acredita-se que as variáveis são independentes.", "Como o valor-p é inferior a 0.05, rejeitamos a hipótese nula\n e acredita-se que as variáveis estão associadas." ))))
+```
+
+### Tabela 1 - Resumo estatística descritiva para cada variável
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+
+
+result3 <- bancofator %>%
+  pivot_longer(cols = 13:43, names_to = "Variável") %>%
+  count(Variável, value = value) %>%
+  rename(Quantidade = n,
+         Nível = value) %>% 
+  mutate(Percentual= percent(Quantidade/117,1)) %>% 
+  na.omit() %>% 
+  mutate(Variável = factor(Variável, levels = ordem_original2)) %>%
+  arrange(Variável)
+
+tabela <- rbind(result, result3) %>% 
+  rename(Qtde = Quantidade)
+
+
+tabela$Nível[tabela$Nível == 1] <- "Sim"
+tabela$Nível[tabela$Nível == 0] <- "Não"
+
+kable(tabela)
+
+```
+
+### Tabela 2 - Resumo teste qui-quadrado descritiva para cada variável
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+
+linha <- length(names(banco))
+
+matriz <- matrix(nrow = linha, ncol = 2)
+
+for (i in 1:linha) {
+  if (i != 7) {
+    pvalor <- chisq.test(banco[,7], banco[,i])
+    matriz[i,2] <- round(pvalor$p.value,4)
+  }
+}
+
+matriz[,1] <- names(banco)
+  
+tabela <- matriz %>% 
+  as.data.frame() %>% 
+  rename(Variável = V1, 
+         "p-valor" = V2) %>% 
+  na.omit() %>% 
+  arrange(`p-valor`)
+
+kable(tabela)
+
+```
+
+## 3.2 - Modelo de regressão logística
+
+<div style="text-align: justify">
+
+A análise de regressão é uma ferramenta estatística que nos permite
+explorar as relações entre variáveis, identificar fatores significativos
+e quantificar o impacto desses fatores em uma variável de interesse.
+Como temos uma variável de interesse com duas categorias, vamos utilizar
+uma regressão logistica.
+
+Essa abordagem permite a compreensão de forma mais intuitiva como as
+variáveis explicativas estão relacionadas à variável de interesse.
+
+<div/>
+
+```{r include=FALSE}
+variaveis <- data.frame(banco$Grupo,
+                        banco$Filmes,
+                        banco$`Visita a parques, praças e espaços na natureza exibidos na tela`,
+                        banco$Satisfação,
+                        banco$`Visita a patrimônios culturais exibidos na tela`,
+                        banco$`Desfrute da gastronomia retratada na tela, incluindo alimentos e bebidas`,
+                        banco$Idade)
+
+colnames(variaveis) <-   c("Grupo","Filmes","Visita a parques, praças e espaços na natureza exibidos na tela",
+  "Satisfação", "Visita a patrimônios culturais exibidos na tela", 
+  "Desfrute da gastronomia retratada na tela, incluindo alimentos e bebidas", "Idade")
+
+
+for (i in 1:117) {
+  if(variaveis[i,1] == "Geral ou Casual"){
+    variaveis[i,1] = 0
+  } else {
+    variaveis[i,1] = 1
+  }
+}
+
+for (i in 1:117) {
+  if(variaveis[i,4] == "Muito satisfeito"){
+    variaveis[i,4] = 1
+  } else {
+    variaveis[i,4] = 0
+  }
+}
+
+
+str(variaveis)
+
+variaveis <- map_df(variaveis, as.factor)
+
+```
+
+**Estimação do modelo de regressão logística**
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+
+# Modelo utilizando somente as variaveis com p-valor < 0.15 no teste qui-quadrado
+
+
+M <- glm(Grupo ~ `Visita a parques, praças e espaços na natureza exibidos na tela` +
+            Filmes + Satisfação + `Visita a patrimônios culturais exibidos na tela` + 
+        `Desfrute da gastronomia retratada na tela, incluindo alimentos e bebidas` +
+          Idade, data = variaveis,
+               family = binomial(link = "logit"))
+# summary(M1)
+
+#Modelo retirando variável idade
+
+M <- glm(Grupo ~ `Visita a parques, praças e espaços na natureza exibidos na tela` +
+            Filmes + Satisfação + `Visita a patrimônios culturais exibidos na tela` + 
+        `Desfrute da gastronomia retratada na tela, incluindo alimentos e bebidas`,
+        data = variaveis,
+               family = binomial(link = "logit"))
+
+#Modelo retirando variável idade e `Visita a patrimônios culturais exibidos na tela` 
+
+M1 <- glm(Grupo ~ `Visita a parques, praças e espaços na natureza exibidos na tela` +
+            Filmes + Satisfação + 
+        `Desfrute da gastronomia retratada na tela, incluindo alimentos e bebidas`,
+        data = variaveis,
+               family = binomial(link = "logit"))
+
+
+# summary(M2)
+
+# este modelo todas as variaveis deu significativa
+
+
+#Modelo utilizando as variaveis com p-valor < 0.05 no teste qui-quadrado
+
+M2 <- glm(Grupo ~`Visita a parques, praças e espaços na natureza exibidos na tela` +   Filmes + `Desfrute da gastronomia retratada na tela, incluindo alimentos e bebidas`, data = variaveis,
+               family = binomial(link = "logit"))
+
+```
+
+<div style="text-align: justify">
+
+Foram estimados dois modelos em que todos os coeficientes deram
+significativos. Utilizamos os Testes de de independência para nortear
+quais variáveis seriam utilizadas a princípio no modelo.
+
+No modelo 1, como mostrado abaixo, a variável binária grupo é explicada
+pelas variáveis: 
+- Visita a parques, praças e espaços na natureza exibidos na tela; 
+- Filmes; 
+- Satisfação; 
+- Desfrute da gastronomia retratada na tela, incluindo alimentos e bebidas.
+
+No modelo 2, como mostrado abaixo, a variável binária grupo é explicada
+pelas variáveis: 
+- Visita a parques, praças e espaços na natureza exibidos na tela; 
+- Filmes; 
+- Desfrute da gastronomia retratada na tela, incluindo alimentos e bebidas.
+
+É preciso saber se o modelo maior (modelo 1) é significativamente
+superior ao modelo menor (modelo 2), ou seja, se a varíavel "Satisfação"
+consegue melhorar a previsão de classificação do grupo. Caso a resposta
+seja não, optaremos pelo modelo 2 por ser mais parcimonioso.
+
+Para isso, será preciso realizar a análise do que é chamado em
+Estatística de modelos encaixados, e observaremos a deviance dos modelos.
+
+<div/>
+
+**Análise de modelos encaixados**
+
+### Tabela 3 - ANOVA para os modelos de regreessão encaixados
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+
+kable(anova(M2,M1, test="LR")) 
+
+deltaDevi <- M2$deviance - M1$deviance # segue distribuição qui-quadrado com (M3$df.residual - M$df.residual) de liberdade
+
+valorp <- 1-pchisq(deltaDevi, 1) # probabilidade de ser maior que a deltaDevi
+
+#As duas formas feitas acima, pela anova e calculando a estatística chega ao mesmo resultado
+```
+
+A estatística $D_q$ (deviance do modelo com menos parâmetros) $D_p$
+(deviance do modelo com mais parâmetros), onde q e p é número de
+parâmetros dos modelos, respectivamente, é útil como medida de variação
+dos dados explicada pelos termos que estão no modelo maior e não estão
+no modelo menor.
+
+Assintoticamente, pode-se escrever:
+
+$\Delta D$ = $D_q$ - $D_p$ \~ $\mathbf{X}^{2}_{p-q}$
+
+Hipóteses:
+
+$H_0$: a diferença entre os modelos não é significativa
+
+$H_1$: a diferença entre os modelos é significativa
+
+Como o valor-p deu 0.014, rejeitamos a hipótese nula e ficamos com o
+modelo com mais parâmetros. Acredita-se que a variável "Satisfação"
+contribui para explicar a variabilidade dos dados.
+
+**Análise de deviance**
+
+```{r, eval = FALSE, include = FALSE}
+
+M1$deviance
+qchisq(0.95,112)
+
+```
+
+Agora, é preciso conferir se a deviance do modelo escolhido é moderada.
+Para decidir se uma deviance é pequena / moderada / grande, podemos usar
+como referência:
+
+O percentil $\mathbf{X}^{2}_{n-p}$, onde "n" é o tamanho da amostra (116) e "p" o número de parêmetros (4).
+
+Se P(D \> $\mathbf{X}^{2}_{n-p;\alpha}$) = $\alpha$; neste caso, 0 \< D \<
+$\mathbf{X}^{2}_{n-p;\alpha}$ indica deviance pequena ou moderada.
+
+O valor esperado $\mathbf{X}^{2}_{n-p;\alpha}$ que é igual (n - p);
+neste caso, uma deviance moderada estaria próxima de n − p.
+
+Para o modelo, D = 100.07. A média da distribuição $\mathbf{X}^{2}_{12}$ é 112. D está próximo da média, logo podemos
+considerá-la moderada. Também, o percentil da distribuição
+$\mathbf{X}^{2}_{112}$ com $\alpha$ = 0.05 é 137.70. Como 0 \< D \<
+137.7015, o modelo possui deviance moderada.
+
+### Tabela 4 - Regressores, coeficientes, Valor-p e impacto da covariável sobre a chance (odds)
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+coeficiente <- coef(M1)
+
+names(coeficiente) <- c("Intercepto", "Filmes (sim)", "Visita a parques (sim), praças e espaços na natureza exibidos na tela (sim)", "Muito satisfeito (sim)", "Desfrute da gastronomia retratada na tela (sim)")
+
+pvalor <- as.data.frame(summary(M1)$coef[, "Pr(>|z|)"])
+
+exp <- percent(exp(coef(M1))-1, 2)
+
+coeficiente <- data.frame(coeficiente, round(pvalor,4), exp)
+
+colnames(coeficiente) <- c("Coeficiente", "Valor-p", "100*(e{beta}-1)")
+
+kable(coeficiente)
+
+```
+
+Evidenciando o modelo de regressão logística para a chance, a equação fica:
+
+\begin{center}
+\fontsize{18pt}{20pt}\selectfont
+$\frac{\theta}{{1-\theta}} = e^{1.16 - 2.08X_1 - 2.77X_2 + 1.36X_3 + 1.37X_4}$
+\normalsize
+\end{center}
+
+
+A chance é a probabilidade do turista ser específico divido pela probabilidade dele não ser específico (ser geral ou casual). Se a razão der maior que 1, então quer dizer que há mais chance dele ser específico. Se menor que 1, há mais chance dele não ser específico. Por fim, se for igual a 1, as chances são iguais dele ser específico ou ser casual/geral.
+
+Na coluna 100 x ($e^{\beta}-1$), tem-se a seguinte interpretação:
+
+-   Mantendo todas as covariáveis fixas, exceto a covariável "filme", se o turista assistir filme, estima-se uma diminuição de 87,57% da chance quando passamos da categoria "não assite filmes" para "assiste filmes".
+
+Da mesma forma, interpreta para as demais covariáveis. Outro exemplo:
+
+-   Mantendo todas as covariáveis fixas, exceto a covariável "muito satisfeito", se o turista ficar muito satisfeito com a viagem, estima-se um aumento de 288,13% da chance quando passamos da categoria "não ficou muito satisfeito" para "ficou muito satisfeito" com a viagem.
+
+Agora, o mesmo modelo para prever a probabilidade do turista ser classificado como turista específico:
+
+
+\begin{center}
+\fontsize{18pt}{20pt}\selectfont
+$\theta = \frac{1}{1 + e^{-(1.16 - 2.08X_1 - 2.77X_2 +1.36X_3 + 1.37X_4)}}$
+\normalsize
+\end{center}
+
+
+Para o modelo, as variáveis estão abaixo:
+
+$X_1$: Visita a parques, praças e espaços na natureza exibidos na tela (sim)
+
+$X_2$: Filmes (sim)
+
+$X_3$: Muito satisfeito (sim)
+
+$X_4$: Desfrute da gastronomia retratada na tela, incluindo alimentos e bebidas (sim)
+
+**Análise de resíduos**
+
+### Gráfico 48 - Distância de Cook
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+CD = cooks.distance(M1)
+pontos_influente <- CD[CD > 4/116]
+
+
+plot_cooksd <- function(object){
+
+  cooksd <- data.frame(
+    cooksd = stats::cooks.distance(object)
+  )
+  n <- length(object$residuals)
+  f <- 4/116 #critério  para calcular a distância de cook 4/n
+
+  ggplot(cooksd, aes(x = seq_along(.data$cooksd), y = .data$cooksd)) +
+    geom_point() +
+    geom_abline(intercept = f, slope = 0, color = "red", linetype="dashed") +
+    geom_segment(aes(x = seq_along(.data$cooksd), y = 0, xend = seq_along(.data$cooksd), yend = .data$cooksd)) +
+    labs(x="Observação",
+         y="Distência de Cook") +
+    ylim(range(c(0, f, cooksd$cooksd))) +
+    theme(legend.position="none") +
+    theme_light() 
+}
+
+plot_cooksd(M1)
+```
+
+Reajustaremos o modelo sem a observação 106 e será comparado se os coeficientes da regressão alteram muito.
+
+### Tabela 5 - Regressores, coeficientes, Valor-p e impacto da covariável sobre a odds
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+variaveissem <- variaveis[-106,]
+
+M3 <- glm(Grupo ~ `Visita a parques, praças e espaços na natureza exibidos na tela` +
+            Filmes + Satisfação + 
+        `Desfrute da gastronomia retratada na tela, incluindo alimentos e bebidas`,
+        data = variaveissem,
+               family = binomial(link = "logit"))
+
+coeficiente <- coef(M3)
+
+names(coeficiente) <- c("Intercepto", "Filmes (sim)", "Visita a parques (sim), praças e espaços na natureza exibidos na tela (sim)", "Muito satisfeito (sim)", "Desfrute da gastronomia retratada na tela (sim)")
+
+pvalor <- as.data.frame(summary(M3)$coef[, "Pr(>|z|)"])
+
+exp <- percent(exp(coef(M3))-1, 2)
+
+coeficiente <- data.frame(coeficiente, round(pvalor,4), exp)
+
+colnames(coeficiente) <- c("Coeficiente", "Valor-p", "100*(exp{beta}-1)")
+
+kable(coeficiente)
+```
+
+Os valores dos coeficientes não são muito diferentes se comparado ao modelo proposto. Logo, não será retirada a observação e será considerado o modelo inicial.
+
+### Gráfico 49: Resíduos contra os valores ajustados do modelo
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+
+eta = predict(M1) # preditor linear
+odds = exp(eta) # chance
+ychapeu <- odds/(1+odds)
+
+# fit = ychapeu 
+
+rp = residuals(M1, type = "pearson") #residuo de pearson
+fit = fitted(M1)
+data <- data.frame(fit, rp)
+
+ggplot(
+  data, aes(x=fit, y=rp)) +
+  geom_point(size = 1) +
+  geom_hline(yintercept = 0, colour = "red") +
+  geom_smooth(method = "loess", se = FALSE, color = "blue", size = 0.6) +
+    labs(x = "Valores Ajustados", y = "Resíduos de Pearson") +
+  theme_light() 
+
+```
+
+A curva Lowess mostra proximidade ao patamar 0. Contudo, ela apresenta formato de parábola, o que indica a necessidade de ajustar o MLG logístico com efeito quadrático de alguma covariáavel. Contudo, como as variáveis são todas binárias, essa transformação não teria efeito. Assim, o modelo possível obtido é este.
+
+Abaixo podemos ver o gráfico que evidencia a probalidade de um individuo ser classificado como pertencente ao grupo "específico", conforme o modelo prevê.
+
+### Gráfico 50: Probabilidade do turista ser classificado como "Específico" pelo modelo
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+
+turista <- c(1:101, 103:117)
+
+data.frame(turista, fit) %>% 
+  ggplot(aes(x=turista, y=fit)) +
+  geom_point(size=0.8) +
+  labs(y = "Probabilidade do turista ser Específico",
+       x="Observação") +
+  geom_hline(yintercept = 0.5, colour = "red", size=0.5) +
+  geom_point() +
+  theme_light()
+  
+
+# sum(variaveis[c(1:101,103:116),1]==1)
+
+```
+
+
+```{r eval=FALSE, message=FALSE, warning=FALSE, echo = FALSE}
+
+
+yreal <- NULL #vetor posição dos individuos que tem o valor real "Específica" 
+
+for (i in turista) {
+  if (variaveis[i,1]=="1") {
+    yreal <- append(yreal, i)
+  }
+}
+
+yprevisto <- NULL #vetor posição dos individuos que o modelo previu como "Específica"
+
+for (i in 1:116) {
+  if (fit[i]>0.5) {
+    yprevisto <- append(yprevisto, i)
+  }
+}
+
+```
+
+
+\newpage
+
+# 4. Conclusão
+
+<div style="text-align: justify">
+
+A análise descritiva e estatística dos dados revelou, as variáveis mais influentes no contexto da motivação de turistas por produções audiovisuais. Destacaram-se, entre elas, as perguntas relacionadas às *atividades de lazer durante a viagem*, *preferências em produções audiovisuais* e o *nível de satisfação com a experiência audiovisual-induzida*. Esses insights forneceram uma compreensão mais profunda das dinâmicas envolvidas e também direcionaram a construção do modelo final de regressão logística. Ao apresentar esse modelo, buscamos não apenas descrever, mas também prever a propensão de um indivíduo integrar o grupo de turistas motivados pelo audiovisual, fazendo assim para uma abordagem extensiva e preditiva nas pesquisas sobre o tema.
+
+<div/>

@@ -1,0 +1,2150 @@
+
+---
+title: 'Relatório: 1ª Rodada Laboratório 1'
+author: "Joaquim e Isabelle"
+date: "05-10-2023"
+output:
+  pdf_document: default
+  html_document:
+    df_print: paged
+  word_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(warning = FALSE, echo = TRUE, message = FALSE)
+```
+
+```{r, include=FALSE}
+
+#Pacotes utilizados
+
+# install.packages("readxl")
+# install.packages("tidyverse")
+# install.packages("ggridges")
+# install.packages("scales")
+# install.packages("gmodels")
+# install.packages("ggplot2")
+# install.packages("caret")
+# install.packages("leaps")
+# install.packages("MASS")
+# install.packages("dplyr")
+# install.packages("reshape2")
+# install.packages("ggridges")
+# install.packages("kableExtra")
+# install.packages("recipes")
+# tinytex::reinstall_tinytex(repository = "illinois")
+
+
+
+library(ggplot2)
+library(leaps)
+library(caret)
+library(MASS)
+library(dplyr)
+library(readxl)
+library(tidyverse)
+library(reshape2)
+library(ggridges)
+library(scales)
+library(gmodels)
+library(tidyr)
+library(knitr)
+library(magrittr)
+library(kableExtra)
+library(tinytex)
+
+
+
+
+
+```
+
+\newpage
+
+# 1. Introdução
+
+<div style="text-align: justify">
+A cliente Roberta Brandão da Cunha orientada pela Dra. Aline Cristine Souza Lopes são responsáveis pela pesquisa "Consumo alimentar segundo a condição de segurança alimentar após o rompimento de barragem em Brumadinho-MG", um estudo seccional, desenvolvido a partir da linha de base do “Projeto Saúde Brumadinho”, um estudo de coorte, coordenado pela Fundação Oswaldo Cruz em Minas Gerais (Fiocruz Minas), em parceria com a Universidade Federal do Rio de Janeiro (UFRJ), conduzido no município de Brumadinho. A população participante será acompanhada por seguimentos anuais, permitindo a avaliação longitudinal de aspectos relevantes após o desastre. Os acompanhamentos ocorrerão, inicialmente, entre os anos de 2022 e 2024.  
+ 
+As informações da linha de base foram obtidas por entrevista realizada nos domicílios amostrados, incluindo os moradores na faixa etária de interesse, contemplando três questionários: domiciliar e individual - adultos. O questionário domiciliar foi respondido por qualquer morador adulto que se mostrasse capaz de prestar as informações solicitadas: características demográficas dos residentes; características físicas do domicílio.
+<div/>
+
+
+## 1.1 Objetivos Gerais do estudo  
+<div style="text-align: justify">  
+Analisar o consumo alimentar segundo a condição de segurança alimentar, após o rompimento de barragem de rejeitos em Brumadinho-MG. Esta análise será feita a partir dos seguintes pontos:
+<div/>
+
+
+## 1.2 Objetivos Específicos  
+<div style="text-align: justify">
+- Caracterização da Insegurança Alimentar (IA) conforme as características sociodemográficas e de
+saúde dos participantes;  
+- Descrição do consumo alimentar dos participantes;  
+- Verificação da associação entre a situação de Insegurança Alimentar do domicílio e o consumo
+alimentar dos participantes.  
+<div/>
+
+
+\newpage
+# 2 Metodologia  
+<div style="text-align: justify">
+O banco de dados contém 72 variáveis e 3.080 indivíduos entrevistados. Entre as variáveis observadas, uma parte se aplicava aos domicílios e aoutra parte se aplicava para os indivíduos. Devido a isso, fez-se necessário criar um segundo banco de dados, subconjunto do banco original, em que cada linha representava um domicílio. Dessa forma, trabalhamos com dois bancos de dados:  
+ 
+- um banco com 3.080 linhas, onde cada linha representava um indivíduo;  
+- um banco com 1.446 linhas, onde cada linha representava um domicílio.  
+
+O trabalho foi dividido em três partes. A primeira consiste em uma análise exploratória, utilizando-se estatisticas descritivas. A segunda, uma análise univariada, com aplicação de teste t, Anova, teste qui-quadrado. Por fim, a terceira parte foi feita uma análise multivariada, utilizando-se regressão de Poisson e Binomial Negativa para cada variável resposta consumo alimentar. Ao todo, foram obtidos 9 modelos de regressão.      
+ 
+Quanto as escolhas das covariáveis para o modelo de regressão, optou-se em excluir aquelas que tinhas muitos níveis (acima de 3), para obter um modelo mais parcimonioso. Além disso, por meio da técnica stepwise escolheram-se os preditores adequados para cada desfecho analisado.  
+ 
+O software estatístico utilizado para obter todas as análises foi o R, versão (4.1.0 ).
+<div/>
+
+\newpage
+# 3 Resultados
+ 
+ 
+## 3.1 Análise exploratória - Estatísticas descritivas
+ 
+
+```{r, echo = FALSE, include = FALSE}
+
+#Leitura e organizacao dos dados
+
+roberta_brumadinho <- read_excel("roberta_brumadinho.xls")
+
+#"Vendo" os dados
+
+#summary(roberta_brumadinho)
+
+#I - Adequando o banco de dados:
+
+roberta_brumadinho <- data.frame(roberta_brumadinho)
+
+#1º - Transformando as colunas IA em factors
+
+roberta_brumadinho$IA <- as.factor(roberta_brumadinho$IA)
+
+roberta_brumadinho$IA01 <- as.factor(roberta_brumadinho$IA01)
+roberta_brumadinho$IA03 <- as.factor(roberta_brumadinho$IA03)
+roberta_brumadinho$IA05 <- as.factor(roberta_brumadinho$IA05)
+roberta_brumadinho$IA07 <- as.factor(roberta_brumadinho$IA07)
+roberta_brumadinho$IA09 <- as.factor(roberta_brumadinho$IA09)
+roberta_brumadinho$IA11 <- as.factor(roberta_brumadinho$IA11)
+roberta_brumadinho$IA13 <- as.factor(roberta_brumadinho$IA13)
+roberta_brumadinho$IA15 <- as.factor(roberta_brumadinho$IA15)
+
+#2º - Atualizando a coluna IA com base no criterio solicitado
+
+any_sim <- rowSums(roberta_brumadinho[, c("IA01", "IA03", "IA05", "IA07", "IA09", "IA11", "IA13", "IA15")] == "Sim") > 0
+all_nao <- rowSums(roberta_brumadinho[, c("IA01", "IA03", "IA05", "IA07", "IA09", "IA11", "IA13", "IA15")] == "Não") == 8
+
+roberta_brumadinho$IA <- ifelse(any_sim, "sim", ifelse(all_nao, "não", NA))
+
+#3º Para calcular a porcentagem de domicilios em IA teremos que pegar somente um individuo
+#por domicilio
+
+unique_roberta_brumadinho <- roberta_brumadinho %>%
+  distinct(ID.DOMICILIAR, .keep_all = TRUE)
+
+#4º Trocar os caracteres das colunas (12,14,16,18,21,22,24,26,27,29,31) do banco para "caracter número"
+
+coluna <- c(12,14,16,18,21,22,24,26,27,29,31) # selecionar somente as colunas do banco que referem quantos dias comem determinado alimento
+valores <- unique(roberta_brumadinho[,14]) #os valores são os mesmos para todas as colunas, então peguei os valores da coluna 14
+referencia <- as.matrix(cbind(valores,c(3,6,2,7,0,4,1,5,NA)))
+
+for (i in 1:3080) {
+  for (a in 1:length(coluna)) {
+    for (b in 1:length(referencia[,1])) {
+      if (roberta_brumadinho[i,coluna[a]]==referencia[b,1]) {
+        roberta_brumadinho[i,coluna[a]]=referencia[b,2]
+      }
+    }
+  }
+}
+
+# Trocar coluna "RENDIMENTOS MENSAIS"
+
+for (i in 1:3080){
+  if(is.na(roberta_brumadinho[i,11])){
+      FALSE  
+  } else if (roberta_brumadinho[i,11]=="Não sabe/ não respondeu"){
+    roberta_brumadinho[i,11]=NA
+    } else if (roberta_brumadinho[i,11]=="Não teve renda"){
+      roberta_brumadinho[i,11]=0
+    }
+}
+
+# Transformar colunas caracter para numérico
+
+numerico <- c(5,7,11,12,14,16,18,21,22,24,26,27,29,31,41)
+
+for (i in 1:length(numerico)) {
+  roberta_brumadinho[,numerico[i]]=as.numeric(roberta_brumadinho[,numerico[i]])
+}
+
+# Trocar dado na variável COR/RAÇA
+
+for (i in 1:3080) {
+  if (roberta_brumadinho$COR.RAÇA[i] == "Amarela (origem oriental, japonesa, chinesa, coreana etc.)") {
+    roberta_brumadinho$COR.RAÇA[i] = "Amarela"
+  }
+}
+
+
+# Trocar nome dos estratos geográficos do banco Domicilios
+
+estrato <- unique_roberta_brumadinho
+
+# Corrego do Feijao/Pires/Parque da Cachoeira >> Estrato 1
+# Tejuco >> Estrato 2
+# Setores amostrados >> Estrato 3
+
+for (i in 1:1446) {
+  if (estrato$ESTRATO.GEOGRAFICO[i] == "Corrego do Feijao/Pires/Parque da Cachoeira") {
+    estrato$ESTRATO.GEOGRAFICO[i] = "Estrato 1"
+  }
+  if (estrato$ESTRATO.GEOGRAFICO[i] == "Tejuco") {
+    estrato$ESTRATO.GEOGRAFICO[i] = "Estrato 2"
+  }
+  if (estrato$ESTRATO.GEOGRAFICO[i] == "Setores amostrados") {
+    estrato$ESTRATO.GEOGRAFICO[i] = "Estrato 3"
+  }
+}
+
+# Trocar nome dos estratos geográficos do banco Individuos
+
+estrato2 <- roberta_brumadinho
+
+# Corrego do Feijao/Pires/Parque da Cachoeira >> Estrato 1
+# Tejuco >> Estrato 2
+# Setores amostrados >> Estrato 3
+
+for (i in 1:3080) {
+  if (estrato2$ESTRATO.GEOGRAFICO[i] == "Corrego do Feijao/Pires/Parque da Cachoeira") {
+    estrato2$ESTRATO.GEOGRAFICO[i] = "Estrato 1"
+  }
+  if (estrato2$ESTRATO.GEOGRAFICO[i] == "Tejuco") {
+    estrato2$ESTRATO.GEOGRAFICO[i] = "Estrato 2"
+  }
+  if (estrato2$ESTRATO.GEOGRAFICO[i] == "Setores amostrados") {
+    estrato2$ESTRATO.GEOGRAFICO[i] = "Estrato 3"
+  }
+}
+
+
+
+```
+
+
+```{r echo=FALSE}
+#Construindo uma tabela com percentual de IA  por indivíduo e por domicílio agrupado por Estrato Geográfico
+
+tabela1 <- estrato2 %>%
+  group_by(ESTRATO.GEOGRAFICO) %>%
+  summarise(
+    "Percentual de Indivíduos com IA" = percent((sum(IA=="sim")/n()),2))
+
+tabela2 <- estrato %>%
+  group_by(ESTRATO.GEOGRAFICO) %>%
+  summarise(
+    "Percentual de Domicílios com IA"= percent(sum(IA=="sim")/n(),2))
+
+tabela3 <- estrato2 %>%
+  group_by(ESTRATO.GEOGRAFICO) %>%
+  summarise(
+    "Número de Indivíduos" = n(),
+    "Percentual de Indivíduos" = percent(n()/nrow(estrato2),2))
+
+tabela4 <- estrato %>%
+  group_by(ESTRATO.GEOGRAFICO) %>%
+  summarise(
+    "Número de Domicílios" = n(),
+    "Percentual de Domicílios" = percent(n()/nrow(estrato),1))
+
+
+
+percentualIA <- left_join(tabela1,tabela2, by = "ESTRATO.GEOGRAFICO")
+percentualIA <- rename(percentualIA, "Estrato Geográfico" = ESTRATO.GEOGRAFICO)
+numero <- left_join(tabela3,tabela4, by = "ESTRATO.GEOGRAFICO")
+numero <- rename(numero, "Estrato Geográfico" = ESTRATO.GEOGRAFICO)
+```
+
+
+#### Tabela 1 - Percentual de IA  versus Estrato Geográfico
+
+```{r, echo=FALSE}
+kable(percentualIA)
+```
+
+#### Tabela 2 - Número de indivíduos e domicílios versus Estrato Geográfico  
+ 
+ 
+```{r, echo=FALSE}
+kable(numero)
+```
+
+
+```{r echo=FALSE}
+
+#Descrever o consumo alimentar dos participante
+
+#Indivíduos
+
+quantitativo <- c(5,7,11,12,14,16,18,21,22,24,26,27,29,31,41)
+variaveis <- names(roberta_brumadinho[quantitativo])
+tabelaIND <- data.frame(Variáveis = variaveis,
+                        Média = rep(0,length(variaveis)),
+                        Mínimo = rep(0,length(variaveis)),
+                        Máximo = rep(0,length(variaveis)),
+                        "Percentil 25" = rep(0,length(variaveis)),
+                        "Percentil 50" = rep(0,length(variaveis)),
+                        "Percentil 75" = rep(0,length(variaveis)),
+                        "Desvio Padrão" = rep(0,length(variaveis))
+                        )
+
+for (i in 1:length(quantitativo)) {
+  tabelaIND[i,2:8] = round(c(mean(roberta_brumadinho[,quantitativo[i]], na.rm = T),
+                       min(roberta_brumadinho[,quantitativo[i]], na.rm = T),
+                       max(roberta_brumadinho[,quantitativo[i]], na.rm = T),
+                       quantile(roberta_brumadinho[,quantitativo[i]], na.rm = T, 0.25),
+                       quantile(roberta_brumadinho[,quantitativo[i]], na.rm = T, 0.50),
+                       quantile(roberta_brumadinho[,quantitativo[i]], na.rm = T, 0.75),
+                       sd(roberta_brumadinho[,quantitativo[i]], na.rm = T)), 2)
+}
+
+troca <- c("Número de pessoas no domicílio", "Idade", "Rendimentos mensais", "FLV cozido",
+           "FLV cru", "Frutas", "Suco de fruta", "Feijão", "Carne vermelha", "Frango galinha",
+           "Peixe","Refrigerante ou suco artificial", "Leite", "Doces", "Renda per capita")
+
+tabelaIND[,1] <- troca
+tabelaIND <- tabelaIND %>%
+  arrange(Mínimo)
+```
+
+```{r echo=FALSE}
+alimento <- c(3,12,14,16,18,21,22,24,26,27,29,31)
+alimento <- as.tibble(roberta_brumadinho[,alimento])
+colnames(alimento) <- c("Estrato geográfico","FLV cozido", "FLV cru", "Frutas", "Suco de fruta", "Feijão", "Carne vermelha",
+                        "Frango galinha","Peixe","Refrigerante ou suco artificial", "Leite", "Doces")
+alimento <- melt(alimento)
+
+```
+
+#### Tabela 3 - Consumo alimentar (frequência semanal), idade (anos) e renda mensal  
+ 
+```{r, echo = FALSE}
+kable(tabelaIND)
+```
+
+
+#### Gráfico 1 - Boxplot de consumo alimentar  
+
+```{r, echo = FALSE}
+
+alimento %>%
+  ggplot(aes(x = reorder(variable, value), y = value)) +
+  geom_boxplot(fill = "#F8766d") +
+  scale_y_continuous(breaks = seq(0,7,1), limits = c(0, 7)) +
+  labs(y = "Número de dia",
+       x = "Alimento") +
+  theme_light() +
+  theme(plot.title = element_text(hjust=0.5), axis.text.x = element_text(angle = -20, vjust = 0.5, hjust=0.5))
+ 
+```
+ 
+ 
+#### Gráfico 2 - Quantidade de indivíduos com Insegurança Alimentar (IA) por Sexo  
+ 
+```{r echo = FALSE}
+dado <- table(roberta_brumadinho$SEXO, roberta_brumadinho$IA)
+dado <- dado %>%
+  as.data.frame(dado) %>%
+  rename(SEXO = Var1, IA = Var2) %>%
+  group_by(SEXO) %>%
+  mutate(Relativo = percent(round(Freq/sum(Freq),2)))
+
+dado %>%
+  ggplot(aes(x=reorder(SEXO, Freq), y = Freq, fill = IA, label = Relativo)) +
+  geom_bar(stat = "identity",position = "dodge") +
+  theme_light() +
+  geom_label(position = position_dodge(width = 1), show.legend = F) +
+  labs(title = "",
+       x = "Sexo",
+       y = "Número de IA") +
+  theme(plot.title = element_text(hjust=0.5))
+```
+
+#### Gráfico 3 - Quantidade de indivíduos com Insegurança Alimentar (IA) por Cor/Raça  
+ 
+ 
+
+```{r echo = FALSE}
+dado <- as.data.frame(table(roberta_brumadinho$COR.RAÇA, roberta_brumadinho$IA))
+dado <- dado %>%
+  rename(COR = Var1, IA = Var2) %>%
+  group_by(COR) %>%
+  mutate(Relativo = percent(round(Freq/sum(Freq),2)))
+
+dado %>%
+  ggplot(aes(x=reorder(COR, Freq), y = Freq, fill = IA, label = Relativo)) +
+  geom_bar(stat = "identity",position = "dodge") +
+  theme_light() +
+  geom_label(position = position_dodge(width = 1), show.legend = F) +
+  labs(title = "",
+       x = "Cor/Raça",
+       y = "Número de IA") +
+  theme(plot.title = element_text(hjust=0.5), axis.text.x = element_text(angle = -20, vjust = 0.5, hjust=0.5))
+```
+
+#### Gráfico 4 - Quantidade de indivíduos com Insegurança Alimentar (IA) por Escolaridade  
+ 
+ 
+
+```{r echo=FALSE}
+dado <- as.data.frame(table(roberta_brumadinho$ESCOLA, roberta_brumadinho$IA))
+dado <- dado %>%
+  rename(ESCOLA = Var1, IA = Var2) %>%
+  group_by(ESCOLA) %>%
+  mutate(Relativo = percent(round(Freq/sum(Freq),2)))
+
+dado %>%
+  ggplot(aes(x=reorder(ESCOLA, Freq), y = Freq, fill = IA, label = Relativo)) +
+  geom_bar(stat = "identity",position = "dodge") +
+  theme_light() +
+  geom_label(position = position_dodge(width = 1), show.legend = F) +
+  labs(title = "",
+       x = "Escolaridade",
+       y = "Número de IA") +
+  theme(plot.title = element_text(hjust=0.5), axis.text.x = element_text(angle = -20, vjust = 0.5, hjust=0.5))
+```
+
+#### Gráfico 5 - Quantidade de indivíduos com Insegurança Alimentar (IA) por Estrato Geográfico  
+ 
+
+```{r echo=FALSE}
+dado <- as.data.frame(table(roberta_brumadinho$ESTRATO.GEOGRAFICO, roberta_brumadinho$IA))
+dado <- dado %>%
+  rename(ESTRATO = Var1, IA = Var2) %>%
+  group_by(ESTRATO) %>%
+  mutate(Relativo = percent(round(Freq/sum(Freq),2)))
+
+dado %>%
+  ggplot(aes(x=reorder(ESTRATO, Freq), y = Freq, fill = IA, label = Relativo)) +
+  geom_bar(stat = "identity",position = "dodge") +
+  theme_light() +
+  geom_label(position = position_dodge(width = 1), show.legend = F) +
+  labs(title = "",
+       x = "Estrato Geográfico",
+       y = "Número de IA") +
+  theme(plot.title = element_text(hjust=0.5), axis.text.x = element_text(angle = -20, vjust = 0.5, hjust=0.5))
+
+```
+
+
+#### Gráfico 6 - Quantidade de domicílios com Insegurança Alimentar (IA) por Estrato Geográfico
+
+```{r echo=FALSE}
+dado <- as.data.frame(table(unique_roberta_brumadinho$ESTRATO.GEOGRAFICO, unique_roberta_brumadinho$IA))
+dado <- dado %>%
+  rename(ESTRATO = Var1, IA = Var2) %>%
+  group_by(ESTRATO) %>%
+  mutate(Relativo = percent(round(Freq/sum(Freq),2)))
+
+dado %>%
+  ggplot(aes(x=reorder(ESTRATO, Freq), y = Freq, fill = IA, label = Relativo)) +
+  geom_bar(stat = "identity",position = "dodge") +
+  theme_light() +
+  geom_label(position = position_dodge(width = 1), show.legend = F) +
+  labs(title = "",
+       x = "Estrato Geográfico",
+       y = "Número de IA") +
+  theme(plot.title = element_text(hjust=0.5), axis.text.x = element_text(angle = -20, vjust = 0.5, hjust=0.5))
+```
+
+#### Gráfico 7 - Quantidade de domicílios com Insegurança Alimentar (IA) por Número de pessoas no domicílio  
+ 
+
+```{r echo=FALSE}
+dado <- as.data.frame(table(unique_roberta_brumadinho$PESSOAS.NO.DOMICILIO, unique_roberta_brumadinho$IA))
+dado <- dado %>%
+  rename(PESSOAS = Var1, IA = Var2) %>%
+  group_by(PESSOAS) %>%
+  mutate(Relativo = percent(round(Freq/sum(Freq),2)))
+
+dado %>%
+  ggplot(aes(x=reorder(PESSOAS, Freq), y = Freq, fill = IA, label = Relativo)) +
+  geom_bar(stat = "identity",position = "dodge") +
+  geom_label(position = position_dodge(width = 1), show.legend = F) +
+  theme_light() +
+  labs(title = "",
+       x = "Pessoas no domicilio",
+       y = "Número de IA") +
+  theme(plot.title = element_text(hjust=0.5))
+```
+
+#### Gráfico 8 - Distribuição de Insegurança Alimentar por Idade  
+ 
+```{r, echo = FALSE}
+ggplot(roberta_brumadinho, aes(x = IDADE, y = IA, fill = IA)) +
+  geom_density_ridges(alpha=0.75) +
+  theme_light() +
+  labs(title = "",
+       x = "Idade",
+       y = "Insegurança Alimentar") +
+  theme(plot.title = element_text(hjust=0.5))
+```
+
+#### Gráfico 9 - Distribuição de Insegurança Alimentar por Renda per capita  
+ 
+
+```{r, echo = FALSE}
+
+#retirando os 4 valores discrepantes
+temp <- unique_roberta_brumadinho
+temp$RENDA.PER.CAPITA[1298] <- mean(unique_roberta_brumadinho$RENDA.PER.CAPITA,na.rm=T)
+temp$RENDA.PER.CAPITA[845] <- mean(unique_roberta_brumadinho$RENDA.PER.CAPITA,na.rm=T)
+temp$RENDA.PER.CAPITA[850] <- mean(unique_roberta_brumadinho$RENDA.PER.CAPITA,na.rm=T)
+temp$RENDA.PER.CAPITA[1392] <- mean(unique_roberta_brumadinho$RENDA.PER.CAPITA,na.rm=T)
+
+ggplot(temp, aes(x = RENDA.PER.CAPITA, y = IA, fill = IA)) +
+  geom_density_ridges(alpha=0.75) +
+  theme_light() +
+  labs(title = "",
+       x = "Renda per capita",
+       y = "Insegurança Alimentar") +
+  theme(plot.title = element_text(hjust=0.5))
+
+```
+
+
+```{r, include=FALSE}
+caracteristicas_alimentares <- roberta_brumadinho[,c(6,40,50,46,48,55,12,14,16,18,21,57,22,65,62,27,24,56,29,31,3)]
+
+melt_caracteristicas <- melt(caracteristicas_alimentares)
+class(melt_caracteristicas$value)
+
+#melt_caracteristicas <- ddply(melt_caracteristicas, .(variable), transform, rescale = rescale(value))
+```
+
+
+```{r echo = FALSE}
+ggplot(melt_caracteristicas, aes(luz.eletrica,variable)) +
+  geom_tile(aes(fill = value), colour = "white") +
+  theme_light() +
+  scale_fill_gradient2(low = 'white', high = "red", name = "Número de dias") +
+  labs(title = "",
+       x = "Luz elétrica",
+       y = "Consumo Alimentar")
+
+```
+
+
+```{r echo = FALSE}
+ggplot(melt_caracteristicas, aes(ESTRATO.GEOGRAFICO,variable)) +
+  geom_tile(aes(fill = value), colour = "white") +
+  theme_light() +
+  scale_fill_gradient2(low = "white", high = "red", name = "Número de dias") +
+  theme(plot.title = element_text(hjust=0.5), axis.text.x = element_text(angle = -20))+
+    labs(title = "",
+       x = "Estrato geográfico",
+       y = "Consumo Alimentar")
+```
+
+
+```{r echo = FALSE}
+ggplot(melt_caracteristicas, aes(status.moradia,variable)) +
+  geom_tile(aes(fill = value), colour = "white") +
+  theme_light() +
+  scale_fill_gradient2(low = "white", high = "red", name = "Número de dias") +
+  theme(plot.title = element_text(hjust=0.5), axis.text.x = element_text(angle = -20)) +
+    labs(title = "",
+       x = "Status da moradia",
+       y = "Consumo Alimentar")
+```
+
+
+```{r echo = FALSE}
+ggplot(melt_caracteristicas, aes(IA,variable)) +
+  geom_tile(aes(fill = value), colour = "white") +
+  theme_light() +
+  scale_fill_gradient2(low = "white", high = "red", name = "Número de dias") +
+    labs(title = "",
+       x = "IA",
+       y = "Consumo Alimentar")
+ 
+```
+
+
+```{r echo = FALSE}
+ggplot(melt_caracteristicas, aes(SEXO,variable)) +
+  geom_tile(aes(fill = value), colour = "white") +
+  theme_light() +
+  scale_fill_gradient2(low = "white", high = "red", name = "Número de dias") +
+    labs(title = "",
+       x = "Sexo",
+       y = "Consumo Alimentar")
+```
+
+
+```{r echo = FALSE}
+ggplot(melt_caracteristicas, aes(CD03,variable)) +
+  geom_tile(aes(fill = value), colour = "white") +
+  theme_light() +
+  scale_fill_gradient2(low = "white", high = "red", name = "Número de dias") +
+  theme(plot.title = element_text(hjust=0.5), axis.text.x = element_text(angle = -10)) +
+    labs(title = "",
+       x = "Revestimento do imóvel",
+       y = "Consumo Alimentar")
+```
+
+
+```{r echo = FALSE}
+ggplot(melt_caracteristicas, aes(fossa,variable)) +
+  geom_tile(aes(fill = value), colour = "white") +
+  theme_light() +
+  scale_fill_gradient2(low = "white", high = "red", name = "Número de dias") +
+      labs(title = "",
+       x = "Fossa",
+       y = "Consumo Alimentar") +
+  theme(plot.title = element_text(hjust=0.5), axis.text.x = element_text(angle = -20))
+```
+
+
+```{r echo = FALSE}
+ggplot(melt_caracteristicas, aes(mesma.casa.antes.rompimento,variable)) +
+  geom_tile(aes(fill = value), colour = "white") +
+  theme_light() +
+  labs(title = "",
+       x = "Mesma casa antes do rompimento",
+       y = "Consumo Alimentar") +
+  scale_fill_gradient2(low = "white", high = "red",  name = "Número de dias")
+```
+
+
+```{r echo = FALSE}
+ggplot(melt_caracteristicas, aes(mudança.status.moradia,variable)) +
+  geom_tile(aes(fill = value), colour = "white") +
+  theme_light() +  
+  labs(title = "",
+       x = "Mudança do staus da moradia",
+       y = "Consumo Alimentar") +
+  scale_fill_gradient2(low = "white", high = "red", name = "Número de dias")  
+ 
+```
+
+
+```{r echo = FALSE}
+ggplot(melt_caracteristicas, aes(plantio,variable)) +
+  geom_tile(aes(fill = value), colour = "white") +
+  theme_light() +  
+  labs(title = "",
+       x = "Plantio",
+       y = "Consumo Alimentar") +
+  scale_fill_gradient2(low = "white", high = "red", name = "Número de dias")
+```
+
+
+```{r echo = FALSE}
+ggplot(melt_caracteristicas, aes(animais,variable)) +
+  geom_tile(aes(fill = value), colour = "white") +
+  theme_light() +
+  labs(title = "",
+       x = "Animais",
+       y = "Consumo Alimentar") +
+  scale_fill_gradient2(low = "white", high = "red", name = "Número de dias")
+```
+
+#### Gráfico 10 - Quantidade de domicílios com Insegurança Alimentar (IA) por Tipo de revestimento do imóvel  
+ 
+
+```{r echo=FALSE}
+dado <- as.data.frame(table(unique_roberta_brumadinho$CD03, unique_roberta_brumadinho$IA))
+dado <- dado %>%
+  rename(CD03 = Var1, IA = Var2) %>%
+  group_by(CD03) %>%
+  mutate(Relativo = percent(round(Freq/sum(Freq),2)))
+
+dado %>%
+  ggplot(aes(x=reorder(CD03, Freq), y = Freq, fill = IA, label = Relativo)) +
+  geom_bar(stat = "identity",position = "dodge") +
+  geom_label(position = position_dodge(width = 1), show.legend = F) +
+  theme_light() +
+  labs(title = "",
+       x = "Tipo de revestimento do imóvel",
+       y = "Número de IA") +
+  theme(plot.title = element_text(hjust=0.5), axis.text.x = element_text(angle = -20, vjust = 0.5, hjust=0.5))
+```
+
+#### Gráfico 11 - Quantidade de domicílios com Insegurança Alimentar (IA) por Fossa  
+ 
+
+```{r echo=FALSE}
+dado <- as.data.frame(table(unique_roberta_brumadinho$fossa, unique_roberta_brumadinho$IA))
+dado <- dado %>%
+  rename(fossa = Var1, IA = Var2) %>%
+  group_by(fossa) %>%
+  mutate(Relativo = percent(round(Freq/sum(Freq),2)))
+
+dado %>%
+  ggplot(aes(x=reorder(fossa, Freq), y = Freq, fill = IA, label = Relativo)) +
+  geom_bar(stat = "identity",position = "dodge") +
+  geom_label(position = position_dodge(width = 1), show.legend = F) +
+  theme_light() +
+  labs(title = "",
+       x = "Fossa",
+       y = "Número de IA") +
+  theme(plot.title = element_text(hjust=0.5), axis.text.x = element_text(angle = -20, vjust = 0.5, hjust=0.5))
+```
+
+#### Gráfico 12 - quantidade de domicílios com Insegurança Alimentar (IA) por Luz elétrica  
+ 
+
+```{r echo=FALSE}
+dado <- as.data.frame(table(unique_roberta_brumadinho$luz.eletrica, unique_roberta_brumadinho$IA))
+dado <- dado %>%
+  rename(luz.eletrica = Var1, IA = Var2) %>%
+  group_by(luz.eletrica) %>%
+  mutate(Relativo = percent(round(Freq/sum(Freq),2)))
+
+dado %>%
+  ggplot(aes(x=reorder(luz.eletrica, Freq), y = Freq, fill = IA, label = Relativo)) +
+  geom_bar(stat = "identity",position = "dodge") +
+  geom_label(position = position_dodge(width = 1), show.legend = F) +
+  theme_light() +
+  labs(title = "",
+       x = "Luz elétrica",
+       y = "Número de IA")
+```
+
+#### Gráfico 13 - Quantidade de domicílios com Insegurança Alimentar (IA) por Água canalizada  
+ 
+
+```{r echo=FALSE}
+dado <- as.data.frame(table(unique_roberta_brumadinho$agua.canalisada, unique_roberta_brumadinho$IA))
+dado <- dado %>%
+  rename(agua.canalisada = Var1, IA = Var2) %>%
+  group_by(agua.canalisada) %>%
+  mutate(Relativo = percent(round(Freq/sum(Freq),2)))
+
+dado %>%
+  ggplot(aes(x=reorder(agua.canalisada, Freq), y = Freq, fill = IA, label = Relativo)) +
+  geom_bar(stat = "identity",position = "dodge") +
+  geom_label(position = position_dodge(width = 1), show.legend = F) +
+  theme_light() +
+  labs(title = "",
+       x = "Água canalizada",
+       y = "Número de IA")
+```
+
+#### Gráfico 14 - Quantidade de domicílios com Insegurança Alimentar (IA) por Água para beber  
+ 
+
+```{r echo=FALSE}
+dado <- as.data.frame(table(unique_roberta_brumadinho$agua.para.beber, unique_roberta_brumadinho$IA))
+dado <- dado %>%
+  rename(agua.para.beber = Var1, IA = Var2) %>%
+  group_by(agua.para.beber) %>%
+  mutate(Relativo = percent(round(Freq/sum(Freq),2)))
+
+dado %>%
+  ggplot(aes(x=reorder(agua.para.beber, Freq), y = Freq, fill = IA, label = Relativo)) +
+  geom_bar(stat = "identity",position = "dodge") +
+  geom_label(position = position_dodge(width = 1), show.legend = F) +
+  theme_light() +
+  labs(title = "",
+       x = "Água para beber",
+       y = "Número de IA") +
+  theme(plot.title = element_text(hjust=0.5), axis.text.x = element_text(angle = -20, vjust = 0.5, hjust=0.5))
+```
+
+#### Gráfico 15 - Quantidade de domicílios com Insegurança Alimentar (IA) por Tratamento água para beber  
+ 
+
+```{r echo=FALSE}
+dado <- as.data.frame(table(unique_roberta_brumadinho$tratamento.agua.beber, unique_roberta_brumadinho$IA))
+dado <- dado %>%
+  rename(tratamento.agua.beber = Var1, IA = Var2) %>%
+  group_by(tratamento.agua.beber) %>%
+  mutate(Relativo = percent(round(Freq/sum(Freq),2)))
+
+dado %>%
+  ggplot(aes(x=reorder(tratamento.agua.beber, Freq), y = Freq, fill = IA, label = Relativo)) +
+  geom_bar(stat = "identity",position = "dodge") +
+  geom_label(position = position_dodge(width = 1), show.legend = F) +
+  theme_light() +
+  labs(title = "",
+       x = "Tratamento água para beber",
+       y = "Número de IA")
+```
+
+#### Gráfico 16 - Quantidade de domicílios com Insegurança Alimentar (IA) por Mesma casa antes do rompimento  
+ 
+
+```{r echo=FALSE}
+dado <- as.data.frame(table(unique_roberta_brumadinho$mesma.casa.antes.rompimento, unique_roberta_brumadinho$IA))
+dado <- dado %>%
+  rename(mesma.casa.antes.rompimento = Var1, IA = Var2) %>%
+  group_by(mesma.casa.antes.rompimento) %>%
+  mutate(Relativo = percent(round(Freq/sum(Freq),2)))
+
+dado %>%
+  ggplot(aes(x=reorder(mesma.casa.antes.rompimento, Freq), y = Freq, fill = IA, label = Relativo)) +
+  geom_bar(stat = "identity",position = "dodge") +
+  geom_label(position = position_dodge(width = 1), show.legend = F) +
+  theme_light() +
+  labs(title = "",
+       x = "Mesma casa antes rompimento",
+       y = "Número de IA")
+```
+
+#### Gráfico 17 - Quantidade de domicílios com Insegurança Alimentar (IA) por Status da moradia  
+ 
+
+```{r echo=FALSE}
+dado <- as.data.frame(table(unique_roberta_brumadinho$status.moradia, unique_roberta_brumadinho$IA))
+dado <- dado %>%
+  rename(status.moradia = Var1, IA = Var2) %>%
+  group_by(status.moradia) %>%
+  mutate(Relativo = percent(round(Freq/sum(Freq),2)))
+
+dado %>%
+  ggplot(aes(x=reorder(status.moradia, Freq), y = Freq, fill = IA, label = Relativo)) +
+  geom_bar(stat = "identity",position = "dodge") +
+  geom_label(position = position_dodge(width = 1), show.legend = F) +
+  theme_light() +
+  labs(title = "",
+       x = "Status moradia",
+       y = "Número de IA") +
+  theme(plot.title = element_text(hjust=0.5), axis.text.x = element_text(angle = -20, vjust = 0.5, hjust=0.5))
+```
+
+#### Gráfico 18 - Quantidade de domicílios com Insegurança Alimentar (IA) por Mudança do status da moradia  
+ 
+
+```{r echo=FALSE}
+
+dado <- as.data.frame(table(unique_roberta_brumadinho$mudança.status.moradia, unique_roberta_brumadinho$IA))
+dado <- dado %>%
+  rename(mudança.status.moradia = Var1, IA = Var2) %>%
+  group_by(mudança.status.moradia) %>%
+  mutate(Relativo = percent(round(Freq/sum(Freq),2)))
+
+dado %>%
+  ggplot(aes(x=reorder(mudança.status.moradia, Freq), y = Freq, fill = IA, label = Relativo)) +
+  geom_bar(stat = "identity",position = "dodge") +
+  geom_label(position = position_dodge(width = 1), show.legend = F) +
+  theme_light() +
+  labs(title = "",
+       x = "Mudança status moradia",
+       y = "Número de IA")
+
+```
+
+#### Gráfico 19 - Quantidade de domicílios com Insegurança Alimentar (IA) por Lixo  
+ 
+
+```{r echo=FALSE}
+dado <- as.data.frame(table(unique_roberta_brumadinho$lixo, unique_roberta_brumadinho$IA))
+dado <- dado %>%
+  rename(lixo = Var1, IA = Var2) %>%
+  group_by(lixo) %>%
+  mutate(Relativo = percent(round(Freq/sum(Freq),2)))
+
+dado %>%
+  ggplot(aes(x=reorder(lixo, Freq), y = Freq, fill = IA, label = Relativo)) +
+  geom_bar(stat = "identity",position = "dodge") +
+  geom_label(position = position_dodge(width = 1), show.legend = F) +
+  theme_light() +
+  labs(title = "",
+       x = "Lixo",
+       y = "Número de IA") +
+  theme(plot.title = element_text(hjust=0.5), axis.text.x = element_text(angle = -20, vjust = 0.5, hjust=0.5))
+```
+
+#### Gráfico 20 - Quantidade de domicílios com Insegurança Alimentar (IA) por Despesa geral
+ 
+```{r echo=FALSE}
+dado <- as.data.frame(table(unique_roberta_brumadinho$despesa.geral, unique_roberta_brumadinho$IA))
+dado <- dado %>%
+  rename(despesa.geral = Var1, IA = Var2) %>%
+  group_by(despesa.geral) %>%
+  mutate(Relativo = percent(round(Freq/sum(Freq),2)))
+
+dado %>%
+  ggplot(aes(x=reorder(despesa.geral, Freq), y = Freq, fill = IA, label = Relativo)) +
+  geom_bar(stat = "identity",position = "dodge") +
+  geom_label(position = position_dodge(width = 1), show.legend = F) +
+  theme_light() +
+  labs(title = "",
+       x = "Despesa geral",
+       y = "Número de IA") +
+  theme(plot.title = element_text(hjust=0.5), axis.text.x = element_text(angle = -20, vjust = 0.5, hjust=0.5))
+```
+
+#### Gráfico 21 - Quantidade de domicílios com Insegurança Alimentar (IA) por Plantio  
+ 
+```{r echo=FALSE}
+dado <- as.data.frame(table(unique_roberta_brumadinho$plantio, unique_roberta_brumadinho$IA))
+dado <- dado %>%
+  rename(plantio = Var1, IA = Var2) %>%
+  group_by(plantio) %>%
+  mutate(Relativo = percent(round(Freq/sum(Freq),2)))
+
+dado %>%
+  ggplot(aes(x=reorder(plantio, Freq), y = Freq, fill = IA, label = Relativo)) +
+  geom_bar(stat = "identity",position = "dodge") +
+  geom_label(position = position_dodge(width = 1), show.legend = F) +
+  theme_light() +
+  labs(title = "",
+       x = "Plantio",
+       y = "Número de IA")
+```
+
+#### Gráfico 22 - Quantidade de domicílios com Insegurança Alimentar (IA) por Criação de animal  
+ 
+```{r echo=FALSE}
+dado <- as.data.frame(table(unique_roberta_brumadinho$animais, unique_roberta_brumadinho$IA))
+dado <- dado %>%
+  rename(animais = Var1, IA = Var2) %>%
+  group_by(animais) %>%
+  mutate(Relativo = percent(round(Freq/sum(Freq),2)))
+
+dado %>%
+  ggplot(aes(x=reorder(animais, Freq), y = Freq, fill = IA, label = Relativo)) +
+  geom_bar(stat = "identity",position = "dodge") +
+  geom_label(position = position_dodge(width = 1), show.legend = F)  +
+  theme_light() +
+  labs(title = "",
+       x = "Criação de animal",
+       y = "Número de IA")
+```
+
+## 3.2 Análise Univariada
+ 
+```{r, echo = FALSE}
+quantitativo <- c(12,14,16,18,21,22,24,26,27,29,31) #colunas do banco que são de consumo alimentar
+variaveis <- names(roberta_brumadinho[quantitativo]) #nomes das colunas do banco de consumo alimentar
+analise1 <- tibble(  Variáveis = variaveis,
+                    "Média com IA" = rep(0,length(variaveis)),
+                    "Média sem IA" = rep(0,length(variaveis)),
+                    "p-valor" = rep(0,length(variaveis)))
+                 
+
+
+mediaComIA <- roberta_brumadinho %>%  #filtrando o banco com indivíduos que possuem inseguraça alimentar
+  filter(IA=="sim")
+
+mediaSemIA <- roberta_brumadinho %>%  #filtrando o banco com indivíduos que NÃO possuem inseguraça alimentar
+  filter(IA=="não")
+
+
+for (i in 1:length(quantitativo)) {
+  analise1[i,2] = round(mean(mediaComIA[,quantitativo[i]], na.rm = T),2)
+}
+
+for (i in 1:length(quantitativo)) {
+  analise1[i,3] = round(mean(mediaSemIA[,quantitativo[i]], na.rm = T),2)
+}
+
+for (i in 1:length(quantitativo)) {
+  analise1[i,4] = round(as.numeric(t.test(mediaComIA[,quantitativo[i]], mediaSemIA[,quantitativo[i]])[3]), 3)
+}
+
+analise1[,1] <- c("FLV cozido", "FLV cru", "Frutas",
+               "Suco de fruta", "Feijão", "Carne vermelha", "Frango galinha", "Peixe",
+               "Refrigerante ou suco artificial", "Leite", "Doces")
+
+analise1 <-  analise1 %>%
+  arrange(`p-valor`)
+
+```
+ 
+#### Tabela 4 - Teste t para médias independentes Consumo alimentar indivíduos com IA versus Consumo alimentar indivíduos sem IA
+ 
+```{r, echo = FALSE}
+kable(analise1)
+```
+ 
+**Hipótese considerada**:
+
+<div style="text-align: justify">  
+$H_0$: a diferença das médias entre os grupos com IA e sem IA para o consumo alimentar é igual a 0  
+$H_1$: a diferença das médias entre os grupos com IA e sem IA para o consumo alimentar é diferente de 0  
+
+Dada as hipóteses, pode-se considerar com 95% de confiança para as variáveis FLV cozido, Frutas, Suco de fruta, Frango galinha e Refrigerante ou suco artificial existem diferença entre os grupos com IA e sem IA.
+<div/>
+
+```{r, echo = FALSE}
+quantitativo <- c(12,14,16,18,21,22,24,26,27,29,31) #colunas do banco que são de consumo alimentar
+variaveis <- names(roberta_brumadinho[quantitativo]) #nomes das colunas do banco de consumo alimentar
+analise2 <- tibble(Variáveis = variaveis,
+                       "Média Feminino" = rep(0,length(variaveis)),
+                       "Média Masculino" = rep(0,length(variaveis)),
+                       "p-valor" = rep(0,length(variaveis))
+)
+
+
+mediaFem <- roberta_brumadinho %>%  #filtrando o banco com indivíduos sexo feminino
+  filter(SEXO=="Feminino")
+
+mediaMasc <- roberta_brumadinho %>%  #filtrando o banco com indivíduos sexo masculino
+  filter(SEXO=="Masculino")
+
+
+for (i in 1:length(quantitativo)) {
+  analise2[i,2] = round(mean(mediaFem[,quantitativo[i]], na.rm = T),2)
+}
+
+for (i in 1:length(quantitativo)) {
+  analise2[i,3] = round(mean(mediaMasc[,quantitativo[i]], na.rm = T),2)
+}
+
+for (i in 1:length(quantitativo)) {
+  analise2[i,4] = round(as.numeric(t.test(mediaFem[,quantitativo[i]], mediaMasc[,quantitativo[i]])[3]),3)
+}
+
+analise2[,1] <- c("FLV cozido", "FLV cru", "Frutas",
+               "Suco de fruta", "Feijão", "Carne vermelha", "Frango galinha", "Peixe",
+               "Refrigerante ou suco artificial", "Leite", "Doces")
+
+analise2 <-  analise2 %>%
+  arrange(`p-valor`)
+```
+ 
+#### Tabela 5 - Teste t para médias independentes Consumo alimentar indivíduos sexo feminino versus Consumo alimentar indivíduos sexo masculino  
+
+```{r, echo = FALSE}
+kable(analise2)
+```
+ 
+**Hipótese considerada**:
+
+<div style="text-align: justify">
+$H_0$: a diferença das médias entre os sexos feminino e masculino para o consumo alimentar é igual a 0  
+$H_1$: a diferença das médias entre os sexos feminino e masculino para o consumo alimentar é diferente de 0  
+
+Dada as hipóteses, pode-se considerar com 95% de confiança para as variáveis FLV cozido, FLV cru, Frutas, Feijão, Carne vermelha, Refrigerante ou suco artificial e Peixe existem diferença entre os sexos.
+<div/>
+
+
+```{r, echo = FALSE}
+quantitativo <- c(5,7,41) #colunas do banco que estão variáveis de individuo exceto consumo alimentar
+variaveis <- names(roberta_brumadinho[quantitativo]) #nomes das colunas do banco de consumo alimentar
+analise4 <- tibble(Variáveis = variaveis,
+                       "Média com IA" = rep(0,length(variaveis)),
+                       "Média sem IA" = rep(0,length(variaveis)),
+                       "p-valor" = rep(0,length(variaveis))
+)
+
+
+mediaComIA <- roberta_brumadinho %>%  #filtrando o banco com indivíduos que possuem inseguraça alimentar
+  filter(IA=="sim")
+
+mediaSemIA <- roberta_brumadinho %>%  #filtrando o banco com indivíduos que NÃO possuem inseguraça alimentar
+  filter(IA=="não")
+
+
+for (i in 1:length(quantitativo)) {
+  analise4[i,2] = round(mean(mediaComIA[,quantitativo[i]], na.rm = T),2)
+}
+
+for (i in 1:length(quantitativo)) {
+  analise4[i,3] = round(mean(mediaSemIA[,quantitativo[i]], na.rm = T),2)
+}
+
+for (i in 1:length(quantitativo)) {
+  analise4[i,4] = round(as.numeric(t.test(mediaComIA[,quantitativo[i]], mediaSemIA[,quantitativo[i]])[3]), 3)
+}
+
+analise4[,1] <- c("Pessoas no domicílio", "Idade", "Renda per capita")
+
+analise4 <-  analise4 %>%
+  arrange(`p-valor`)
+
+```
+
+#### Tabela 6 - Teste t para médias independentes de outras variáveis para dois grupos: indivíduos com IA e indivíduos sem IA
+ 
+```{r, echo = FALSE}
+kable(analise4)
+```
+ 
+**Hipótese considerada**:
+
+<div style="text-align: justify">
+$H_0$: a diferença das médias entre os grupos com IA e sem IA para as variáveis é igual a 0  
+$H_1$: a diferença das médias entre os grupos com IA e sem IA para as variáveis é diferente de 0  
+
+Dada as hipóteses, pode-se considerar com 95% de confiança para todas as variáveis existem diferença entre as médias os grupos com IA e sem IA.
+<div/>
+ 
+
+```{r, echo = FALSE}
+quantitativo <- c(12,14,16,18,21,22,24,26,27,29,31) #colunas do banco que são de consumo alimentar
+variaveis <- names(estrato2[quantitativo]) #nomes das colunas do banco de consumo alimentar
+analise3 <- tibble(Variáveis = variaveis,
+                       "Média Estrato 1" = rep(0,length(variaveis)),
+                       "Média Estrato 2" = rep(0,length(variaveis)),
+                       "Média Estrato 3" = rep(0,length(variaveis)),
+                       "p-valor" = rep(0,length(variaveis))
+)
+
+
+media1 <- estrato2 %>%  #filtrando o banco com indivíduos de cada estrato
+  filter(ESTRATO.GEOGRAFICO=="Estrato 1")
+
+media2 <- estrato2 %>%  
+  filter(ESTRATO.GEOGRAFICO=="Estrato 2")
+
+media3 <- estrato2 %>%  
+  filter(ESTRATO.GEOGRAFICO=="Estrato 3")
+
+
+for (i in 1:length(quantitativo)) {
+  analise3[i,2] = round(mean(media1[,quantitativo[i]], na.rm = T),2)
+}
+
+for (i in 1:length(quantitativo)) {
+  analise3[i,3] = round(mean(media2[,quantitativo[i]], na.rm = T),2)
+}
+
+for (i in 1:length(quantitativo)) {
+  analise3[i,4] = round(mean(media3[,quantitativo[i]], na.rm = T),2)
+}
+
+for (i in 1:length(quantitativo)) {
+  analise3[i,5] = round(summary(aov(estrato2[,quantitativo[i]] ~
+                                       estrato2[,3]))[[1]]$Pr[1],3)
+}
+
+combinacao <- c("2 e 1, 2 e 3", "2 e 1, 2 e 3", "2 e 1, 2 e 3", "1 e 2",
+                "1 e 2, 1 e 3", "3 e 1, 3 e 2", "1 e 2, 1 e 3, 2 e 3", "Não há diferença entre estratos",
+                "1 e 2, 1 e 3, 2 e 3", "2 e 1, 2 e 2", "3 e 1, 3 e 2")
+
+analise3 <- cbind(analise3, combinacao)
+names(analise3)[6] <- c("Comparação múltipla")
+
+analise3[,1] <- c("FLV cozido", "FLV cru", "Frutas",
+               "Suco de fruta", "Feijão", "Carne vermelha", "Frango galinha", "Peixe",
+               "Refrigerante ou suco artificial", "Leite", "Doces")
+
+analise3 <-  analise3 %>%
+  arrange(`p-valor`)
+```
+ 
+#### Tabela 7 - ANOVA e Comparação múltipla para cada varíavel de consumo alimentar aplicada para os três estratos geográficos.  
+ 
+```{r, echo = FALSE}
+kable(analise3)
+
+```
+ 
+**Hipótese considerada**:
+
+<div style="text-align: justify">
+$H_0$: média Estrato 1 = média Estrato 2 = média Estrato 3  
+$H_1$: Caso contrário  
+
+Dada as hipóteses, pode-se considerar com 95% de confiança que existem diferença para as médias de consumo alimentar entre os estratos mostrados na coluna comparação múltipla.
+<div/>
+
+### Teste 8 - Teste Qui-quadrado de independência
+
+<div style="text-align: justify">
+Esse teste é utilizado para verificar se existe associação entre duas variáveis qualitativas.  
+<div/>
+ 
+**Hipótese considerada**:  
+ 
+<div style="text-align: justify">
+$H_0$: As variáveis Revestimento do imóvel e Insegurança Alimentar são independentes  
+$H_1$: As variáveis Revestimento do imóvel e Insegurança Alimentar estão associadas    
+
+
+```{r, echo = FALSE}
+dado <- table(unique_roberta_brumadinho$CD03, unique_roberta_brumadinho$IA)
+CrossTable(dado, digits = 2, prop.r = F, prop.c = T, prop.chisq = F, chisq = T, format="SPSS",
+           prop.t = F, dnn=c("Revestimento do imóvel", "Insegurança Alimentar"))
+```
+
+Dada as hipóteses, pode-se considerar com 95% de confiança que as variáveis em análise estão associadas.  
+<div/>
+ 
+**Hipótese considerada**:  
+ 
+<div style="text-align: justify">
+$H_0$: As variáveis Fossa e Insegurança Alimentar são independentes  
+$H_1$: As variáveis Fossa e Insegurança Alimentar estão associadas
+
+```{r, echo = FALSE}
+dado <- table(unique_roberta_brumadinho$fossa, unique_roberta_brumadinho$IA)
+CrossTable(dado, digits = 2, prop.r = F, prop.c = T, prop.chisq = F, chisq = T, format="SPSS",
+           prop.t = F, dnn=c("Fossa", "Insegurança Alimentar"))
+```
+
+Dada as hipóteses, pode-se considerar com 95% de confiança que as variáveis em análise estão associadas.  
+<div/>
+ 
+**Hipótese considerada**:  
+ 
+<div style="text-align: justify">
+$H_0$: As variáveis Lixo e Insegurança Alimentar são independentes  
+$H_1$: As variáveis Lixo e Insegurança Alimentar estão associadas
+
+```{r, echo = FALSE}
+dado <- table(unique_roberta_brumadinho$lixo, unique_roberta_brumadinho$IA)
+CrossTable(dado, digits = 2, prop.r = F, prop.c = T, prop.chisq = F, chisq = T, format="SPSS",
+           prop.t = F, dnn=c("Lixo", "Insegurança Alimentar"))
+```
+
+Dada as hipóteses, pode-se considerar com 95% de confiança que as variáveis em análise são independentes.  
+<div/>
+ 
+**Hipótese considerada**:  
+ 
+<div style="text-align: justify">
+$H_0$: As variáveis Água canalizada e Insegurança Alimentar são independentes  
+$H_1$: As variáveis Água canalizada e Insegurança Alimentar estão associadas
+
+```{r, echo = FALSE}
+dado <- table(unique_roberta_brumadinho$agua.canalisada, unique_roberta_brumadinho$IA)
+CrossTable(dado, digits = 2, prop.r = F, prop.c = T, prop.chisq = F, chisq = T, format="SPSS",
+           prop.t = F, dnn=c("Água canalizada", "Insegurança Alimentar"))
+```
+
+Dada as hipóteses, pode-se considerar com 95% de confiança que as variáveis em análise são independentes.  
+<div/>
+ 
+**Hipótese considerada**:  
+ 
+<div style="text-align: justify">
+$H_0$: As variáveis Água para beber e Insegurança Alimentar são independentes  
+$H_1$: As variáveis Água para beber e Insegurança Alimentar estão associadas  
+
+```{r, echo = FALSE}
+dado <- table(unique_roberta_brumadinho$agua.para.beber, unique_roberta_brumadinho$IA)
+CrossTable(dado, digits = 2, prop.r = F, prop.c = T, prop.chisq = F, chisq = T, format="SPSS",
+           prop.t = F, dnn=c("Água para beber", "Insegurança Alimentar"))
+```
+
+Dada as hipóteses, pode-se considerar com 95% de confiança que as variáveis em análise estão associadas.  
+<div/>
+ 
+**Hipótese considerada**:  
+ 
+<div style="text-align: justify">
+$H_0$: As variáveis Tratamento da água para beber e Insegurança Alimentar são independentes  
+$H_1$: As variáveis Tratamento da água para beber e Insegurança Alimentar estão associadas
+
+```{r, echo = FALSE}
+dado <- table(unique_roberta_brumadinho$tratamento.agua.beber, unique_roberta_brumadinho$IA)
+CrossTable(dado, digits = 2, prop.r = F, prop.c = T, prop.chisq = F, chisq = T, format="SPSS",
+           prop.t = F, dnn=c("Tratamento da água para beber", "Insegurança Alimentar"))
+```
+
+Dada as hipóteses, pode-se considerar com 95% de confiança que as variáveis em análise são independentes.  
+<div/>
+ 
+**Hipótese considerada**:  
+ 
+<div style="text-align: justify">
+$H_0$: As variáveis Mesma casa antes do rompimento e Insegurança Alimentar são independentes  
+$H_1$: As variáveis Mesma casa antes do rompimento e Insegurança Alimentar estão associadas
+
+```{r, echo = FALSE}
+dado <- table(unique_roberta_brumadinho$mesma.casa.antes.rompimento, unique_roberta_brumadinho$IA)
+CrossTable(dado, digits = 2, prop.r = F, prop.c = T, prop.chisq = F, chisq = T, format="SPSS",
+           prop.t = F, dnn=c("Mesma casa antes do rompimento", "Insegurança Alimentar"))
+```
+
+Dada as hipóteses, pode-se considerar com 95% de confiança que as variáveis em análise são independentes.  
+<div/>
+ 
+**Hipótese considerada**:  
+ 
+<div style="text-align: justify">
+$H_0$: As variáveis Status da moradia e Insegurança Alimentar são independentes  
+$H_1$: As variáveis Status da moradia e Insegurança Alimentar estão associadas
+
+```{r, echo = FALSE}
+dado <- table(unique_roberta_brumadinho$status.moradia, unique_roberta_brumadinho$IA)
+CrossTable(dado, digits = 2, prop.r = F, prop.c = T, prop.chisq = F, chisq = T, format="SPSS",
+           prop.t = F, dnn=c("Status da moradia", "Insegurança Alimentar"))
+```
+
+Dada as hipóteses, pode-se considerar com 95% de confiança que as variáveis em análise estão associadas.  
+<div/>
+ 
+**Hipótese considerada**:  
+ 
+<div style="text-align: justify">
+$H_0$: As variáveis Mudança do status da moradia e Insegurança Alimentar são independentes  
+$H_1$: As variáveis Mudança do status da moradia e Insegurança Alimentar estão associadas
+
+```{r, echo = FALSE}
+dado <- table(unique_roberta_brumadinho$mudança.status.moradia, unique_roberta_brumadinho$IA)
+CrossTable(dado, digits = 2, prop.r = F, prop.c = T, prop.chisq = F, chisq = T, format="SPSS",
+           prop.t = F, dnn=c("Mudança do status da moradia", "Insegurança Alimentar"))
+```
+
+Dada as hipóteses, pode-se considerar com 95% de confiança que as variáveis em análise são independentes.  
+<div/>
+ 
+**Hipótese considerada**:  
+ 
+<div style="text-align: justify">
+$H_0$: As variáveis Despesa Geral e Insegurança Alimentar são independentes  
+$H_1$: As variáveis Despesa Geral e Insegurança Alimentar estão associadas
+
+```{r, echo = FALSE}
+dado <- table(unique_roberta_brumadinho$despesa.geral, unique_roberta_brumadinho$IA)
+CrossTable(dado, digits = 2, prop.r = F, prop.c = T, prop.chisq = F, chisq = T, format="SPSS",
+           prop.t = F, dnn=c("Despesa Geral", "Insegurança Alimentar"))
+```
+
+Dada as hipóteses, pode-se considerar com 95% de confiança que as variáveis em análise estão associadas.  
+<div/>
+ 
+**Hipótese considerada**:  
+ 
+<div style="text-align: justify">
+$H_0$: As variáveis Plantio e Insegurança Alimentar são independentes  
+$H_1$: As variáveis Plantio e Insegurança Alimentar estão associadas
+
+```{r, echo = FALSE}
+dado <- table(unique_roberta_brumadinho$plantio, unique_roberta_brumadinho$IA)
+CrossTable(dado, digits = 2, prop.r = F, prop.c = T, prop.chisq = F, chisq = T, format="SPSS",
+           prop.t = F, dnn=c("Plantio", "Insegurança Alimentar"))
+```
+
+Dada as hipóteses, pode-se considerar com 95% de confiança que as variáveis em análise são independentes.  
+<div/>
+ 
+**Hipótese considerada**:  
+ 
+<div style="text-align: justify">
+$H_0$: As variáveis Animal e Insegurança Alimentar são independentes  
+$H_1$: As variáveis Animal e Insegurança Alimentar estão associadas
+
+```{r, echo = FALSE}
+dado <- table(unique_roberta_brumadinho$animais, unique_roberta_brumadinho$IA)
+CrossTable(dado, digits = 2, prop.r = F, prop.c = T, prop.chisq = F, chisq = T, format="SPSS",
+           prop.t = F, dnn=c("Animal", "Insegurança Alimentar"))
+```
+
+Dada as hipóteses, pode-se considerar com 95% de confiança que as variáveis em análise são independentes.  
+<div/>
+ 
+**Hipótese considerada**:  
+ 
+<div style="text-align: justify">
+$H_0$: As variáveis Revestimento do imóvel e Estrato geográfico são independentes  
+$H_1$: As variáveis Revestimento do imóvel e Estrato geográfico estão associadas
+
+```{r, echo = FALSE}
+dado <- table(estrato$CD03, estrato$ESTRATO.GEOGRAFICO)
+CrossTable(dado, digits = 2, prop.r = F, prop.c = T, prop.chisq = F, chisq = T, format="SPSS",
+           prop.t = F, dnn=c("Revestimento do imóvel", "Estrato geográfico"))
+```
+
+Dada as hipóteses, pode-se considerar com 95% de confiança que as variáveis em análise estão associadas.  
+<div/>
+ 
+**Hipótese considerada**:  
+ 
+<div style="text-align: justify">
+$H_0$: As variáveis Fossa e Estrato geográfico são independentes  
+$H_1$: As variáveis Fossa e Estrato geográfico estão associadas
+
+```{r, echo = FALSE}
+dado <- table(estrato$fossa, estrato$ESTRATO.GEOGRAFICO)
+CrossTable(dado, digits = 2, prop.r = F, prop.c = T, prop.chisq = F, chisq = T, format="SPSS",
+           prop.t = F, dnn=c("Fossa", "Estrato geográfico"))
+```
+
+Dada as hipóteses, pode-se considerar com 95% de confiança que as variáveis em análise estão associadas.  
+<div/>
+ 
+**Hipótese considerada**:  
+ 
+<div style="text-align: justify">
+$H_0$: As variáveis Lixo e Estrato geográfico são independentes  
+$H_1$: As variáveis Lixo e Estrato geográfico estão associadas
+
+```{r, echo = FALSE}
+dado <- table(estrato$lixo, estrato$ESTRATO.GEOGRAFICO)
+CrossTable(dado, digits = 2, prop.r = F, prop.c = T, prop.chisq = F, chisq = T, format="SPSS",
+           prop.t = F, dnn=c("Lixo", "Estrato geográfico"))
+```
+
+Dada as hipóteses, pode-se considerar com 95% de confiança que as variáveis em análise são independentes.  
+<div/>
+ 
+**Hipótese considerada**:  
+ 
+<div style="text-align: justify">
+$H_0$: As variáveis Água canalizada e Estrato geográfico são independentes  
+$H_1$: As variáveis Água canalizada e Estrato geográfico estão associadas
+
+```{r, echo = FALSE}
+dado <- table(estrato$agua.canalisada, estrato$ESTRATO.GEOGRAFICO)
+CrossTable(dado, digits = 2, prop.r = F, prop.c = T, prop.chisq = F, chisq = T, format="SPSS",
+           prop.t = F, dnn=c("Água canalizada", "Estrato geográfico"))
+```
+
+Dada as hipóteses, pode-se considerar com 95% de confiança que as variáveis em análise são independentes.  
+<div/>
+ 
+**Hipótese considerada**:  
+ 
+<div style="text-align: justify">
+$H_0$: As variáveis Água para beber e Estrato geográfico são independentes  
+$H_1$: As variáveis Água para beber e Estrato geográfico estão associadas
+
+```{r, echo = FALSE}
+dado <- table(estrato$agua.para.beber, estrato$ESTRATO.GEOGRAFICO)
+CrossTable(dado, digits = 2, prop.r = F, prop.c = T, prop.chisq = F, chisq = T, format="SPSS",
+           prop.t = F, dnn=c("Água para beber", "Estrato geográfico"))
+```
+
+Dada as hipóteses, pode-se considerar com 95% de confiança que as variáveis em análise estão associadas.  
+<div/>
+ 
+**Hipótese considerada**:  
+ 
+<div style="text-align: justify">
+$H_0$: As variáveis Tratamento da água para beber e Estrato geográfico são independentes  
+$H_1$: As variáveis Tratamento da água para beber e Estrato geográfico estão associadas
+
+```{r, echo = FALSE}
+dado <- table(estrato$tratamento.agua.beber, estrato$ESTRATO.GEOGRAFICO)
+CrossTable(dado, digits = 2, prop.r = F, prop.c = T, prop.chisq = F, chisq = T, format="SPSS",
+           prop.t = F, dnn=c("Tratamento da água para beber", "Estrato geográfico"))
+```
+
+Dada as hipóteses, pode-se considerar com 95% de confiança que as variáveis em análise estão associadas.  
+<div/>
+ 
+**Hipótese considerada**:  
+ 
+<div style="text-align: justify">
+$H_0$: As variáveis Mesma casa antes do rompimento e Estrato geográfico são independentes  
+$H_1$: As variáveis Mesma casa antes do rompimento e Estrato geográfico estão associadas
+
+```{r, echo = FALSE}
+dado <- table(estrato$mesma.casa.antes.rompimento, estrato$ESTRATO.GEOGRAFICO)
+CrossTable(dado, digits = 2, prop.r = F, prop.c = T, prop.chisq = F, chisq = T, format="SPSS",
+           prop.t = F, dnn=c("Mesma casa antes do rompimento", "Estrato geográfico"))
+```
+
+Dada as hipóteses, pode-se considerar com 95% de confiança que as variáveis em análise estão associadas.  
+<div/>
+ 
+**Hipótese considerada**:  
+ 
+<div style="text-align: justify">
+$H_0$: As variáveis Status da moradia e Estrato geográfico são independentes  
+$H_1$: As variáveis Status da moradia e Estrato geográfico estão associadas
+
+```{r, echo = FALSE}
+dado <- table(estrato$status.moradia, estrato$ESTRATO.GEOGRAFICO)
+CrossTable(dado, digits = 2, prop.r = F, prop.c = T, prop.chisq = F, chisq = T, format="SPSS",
+           prop.t = F, dnn=c("Status da moradia", "Estrato geográfico"))
+```
+
+Dada as hipóteses, pode-se considerar com 95% de confiança que as variáveis em análise estão associadas.  
+<div/>
+ 
+**Hipótese considerada**:  
+ 
+<div style="text-align: justify">
+$H_0$: As variáveis Mudança do status da moradia e Estrato geográfico são independentes  
+$H_1$: As variáveis Mudança do status da moradia e Estrato geográfico estão associadas
+
+```{r, echo = FALSE}
+dado <- table(estrato$mudança.status.moradia, estrato$ESTRATO.GEOGRAFICO)
+CrossTable(dado, digits = 2, prop.r = F, prop.c = T, prop.chisq = F, chisq = T, format="SPSS",
+           prop.t = F, dnn=c("Mudança do status da moradia", "Estrato geográfico"))
+```
+
+Dada as hipóteses, pode-se considerar com 95% de confiança que as variáveis em análise estão associadas.  
+<div/>
+ 
+**Hipótese considerada**:  
+ 
+<div style="text-align: justify">
+$H_0$: As variáveis Despesa Geral e Estrato geográfico são independentes  
+$H_1$: As variáveis Despesa Geral e Estrato geográfico estão associadas
+
+```{r, echo = FALSE}
+dado <- table(estrato$despesa.geral, estrato$ESTRATO.GEOGRAFICO)
+CrossTable(dado, digits = 2, prop.r = F, prop.c = T, prop.chisq = F, chisq = T, format="SPSS",
+           prop.t = F, dnn=c("Despesa Geral", "Estrato geográfico"))
+```
+
+Dada as hipóteses, pode-se considerar com 95% de confiança que as variáveis em análise estão associadas.  
+<div/>
+ 
+**Hipótese considerada**:  
+ 
+<div style="text-align: justify">
+$H_0$: As variáveis Plantio e Estrato geográfico são independentes  
+$H_1$: As variáveis Plantio e Estrato geográfico estão associadas
+
+```{r, echo = FALSE}
+dado <- table(estrato$plantio, estrato$ESTRATO.GEOGRAFICO)
+CrossTable(dado, digits = 2, prop.r = F, prop.c = T, prop.chisq = F, chisq = T, format="SPSS",
+           prop.t = F, dnn=c("Plantio", "Estrato geográfico"))
+```
+
+Dada as hipóteses, pode-se considerar com 95% de confiança que as variáveis em análise estão associadas.  
+<div/>
+ 
+**Hipótese considerada**:  
+ 
+<div style="text-align: justify">
+$H_0$: As variáveis Animal e Estrato geográfico são independentes  
+$H_1$: As variáveis Animal e Estrato geográfico estão associadas
+
+```{r, echo = FALSE}
+dado <- table(estrato$animais, estrato$ESTRATO.GEOGRAFICO)
+CrossTable(dado, digits = 2, prop.r = F, prop.c = T, prop.chisq = F, chisq = T, format="SPSS",
+           prop.t = F, dnn=c("Animal", "Estrato geográfico"))
+```
+
+Dada as hipóteses, pode-se considerar com 95% de confiança que as variáveis em análise estão associadas.  
+<div/>
+ 
+**Hipótese considerada**:  
+ 
+<div style="text-align: justify">
+$H_0$: As variáveis Insegurança Alimentar e Estrato geográfico são independentes  
+$H_1$: As variáveis Insegurança Alimentar e Estrato geográfico estão associadas
+
+```{r, echo = FALSE}
+dado <- table(estrato$IA, estrato$ESTRATO.GEOGRAFICO)
+CrossTable(dado, digits = 2, expected = T, fisher = T, format="SAS",
+           prop.chisq = F, dnn=c("Insegurança Alimentar", "Estrato geográfico"))
+```
+
+Dada as hipóteses, pode-se considerar com 95% de confiança que as variáveis em análise estão associadas.  
+<div/>
+ 
+**Hipótese considerada**:  
+ 
+<div style="text-align: justify">
+$H_0$: As variáveis Sexo e Estrato geográfico são independentes  
+$H_1$: As variáveis Sexo e Estrato geográfico estão associadas
+
+```{r, echo = FALSE}
+
+dado <- table(estrato2$SEXO, estrato2$ESTRATO.GEOGRAFICO)
+CrossTable(dado, digits = 2, expected = T, fisher = T, format="SAS",
+           prop.chisq = F, dnn=c("Sexo", "Estrato geográfico"))
+
+```
+
+Dada as hipóteses, pode-se considerar com 95% de confiança que as variáveis em análise são independentes.  
+<div/>
+
+## 3.2 Análise Univariada  
+ 
+```{r include=FALSE}
+#Ajustando os dados para fazer a regressao
+
+# Variaveis de consumo:
+#
+# FLV_COZIDO
+# FLV_CRU
+# FRUTAS
+# SUCO.DE.FRUTA
+# FEIJÃO
+# CARNE.VERMELHA
+# FRANGO.GALINHA
+# REFRIGERANTE.SUCO.ARTIFICIAL
+# PEIXE
+# LEITE
+# DOCES
+
+library(caret)
+library(leaps)
+library(MASS)
+
+#para utilizarmos as funcoes de stepwise temos que remover todos os dados NA de todas as colunas antes
+
+dados.regressao <- roberta_brumadinho[c('FLV_COZIDO','FLV_CRU','SUCO.DE.FRUTA','REFRIGERANTE.SUCO.ARTIFICIAL','FRUTAS','FEIJÃO','CARNE.VERMELHA','FRANGO.GALINHA','PEIXE','LEITE','DOCES','IA','SEXO','IDADE','COR.RAÇA','ESTRATO.GEOGRAFICO','PESSOAS.NO.DOMICILIO','SITUAÇÃO.CONJUGAL','RENDIMENTOS.MENSAIS','RENDA.PER.CAPITA','ESCOLA','CD03','fossa','lixo','luz.eletrica','agua.canalisada','agua.para.beber','mesma.casa.antes.rompimento','status.moradia','mudança.status.moradia','despesa.alimentacao','plantio','animais')]
+
+#escolhendo as colunas que nao possuem tantos dados faltantes
+
+str(dados.regressao)
+
+dados.regressao[sapply(dados.regressao, is.character)] <- lapply(dados.regressao[sapply(dados.regressao, is.character)], as.factor)
+
+str(dados.regressao)
+
+#as colunas ultimo ano da escola, fossa e status moradia tem muitas categorias (19, 7, 9), por isso vou retira-las da analise. A coluna
+
+dados.regressao <- subset(dados.regressao, select = -c(status.moradia, fossa))
+
+
+#As colunas despesa.alimentacao e RENDIMENTOS.MENSAIS tem muitos dados faltantes, vou retira-las tbm
+
+dados.regressao <- subset(dados.regressao, select = -c(despesa.alimentacao, RENDIMENTOS.MENSAIS, ESCOLA,
+                                                       SITUAÇÃO.CONJUGAL, lixo, COR.RAÇA, agua.para.beber))
+
+roberta.brumadinho.semNA <- drop_na(dados.regressao) #colunas selecionadas e linhas sem nenhum NA
+
+colnames(roberta.brumadinho.semNA)[18] <- "ALVENARIA"
+
+#Retirando os nao sabe /nao respondeu:
+
+roberta.brumadinho.semNA <- roberta.brumadinho.semNA[!roberta.brumadinho.semNA$mudança.status.moradia
+                                                     == 'Não sabe/não respondeu',]
+
+roberta.brumadinho.semNA <- roberta.brumadinho.semNA[!roberta.brumadinho.semNA$plantio
+                                                     == 'Não sabe/não respondeu',]
+
+roberta.brumadinho.semNA <- roberta.brumadinho.semNA[!roberta.brumadinho.semNA$animais
+                                                     == 'Não sabe/não respondeu',]
+roberta.brumadinho.semNA <- roberta.brumadinho.semNA[!roberta.brumadinho.semNA$mesma.casa.antes.rompimento
+                                                     == 'Não sabe/não respondeu',]
+
+roberta.brumadinho.semNA$mudança.status.moradia <- factor(roberta.brumadinho.semNA$mudança.status.moradia)
+roberta.brumadinho.semNA$plantio <- factor(roberta.brumadinho.semNA$plantio)
+roberta.brumadinho.semNA$animais <- factor(roberta.brumadinho.semNA$animais)
+roberta.brumadinho.semNA$mesma.casa.antes.rompimento <- factor(roberta.brumadinho.semNA$mesma.casa.antes.rompimento)
+
+str(roberta.brumadinho.semNA)
+```
+
+```{r include=FALSE}
+
+#Modelos de regressao para cada uma das variaveis
+
+#FRUTAS
+
+reg_FRUTAS <- glm.nb(FRUTAS ~ IA + SEXO + IDADE + ESTRATO.GEOGRAFICO + PESSOAS.NO.DOMICILIO + RENDA.PER.CAPITA + ALVENARIA + luz.eletrica + agua.canalisada + mesma.casa.antes.rompimento + mudança.status.moradia + plantio + animais,
+             data = roberta.brumadinho.semNA)
+
+reg_FRUTAS <- step(reg_FRUTAS, direction='backward', scope=formula(reg_FRUTAS), trace=0)
+
+#FLV_COZIDO
+
+reg_FLV_COZIDO <- glm.nb(FLV_COZIDO ~ IA + SEXO + IDADE + ESTRATO.GEOGRAFICO + PESSOAS.NO.DOMICILIO + RENDA.PER.CAPITA + ALVENARIA + luz.eletrica + agua.canalisada + mesma.casa.antes.rompimento + mudança.status.moradia + plantio + animais,
+             data = roberta.brumadinho.semNA)
+
+reg_FLV_COZIDO <- step(reg_FLV_COZIDO, direction='backward', scope=formula(reg_FLV_COZIDO), trace=0)
+
+#FLV_CRU
+
+reg_FLV_CRU <- glm.nb(FLV_CRU ~ IA + SEXO + IDADE + ESTRATO.GEOGRAFICO + PESSOAS.NO.DOMICILIO + RENDA.PER.CAPITA + ALVENARIA + luz.eletrica + agua.canalisada + mesma.casa.antes.rompimento + mudança.status.moradia + plantio + animais,
+             data = roberta.brumadinho.semNA)
+
+reg_FLV_CRU <- step(reg_FLV_CRU, direction='backward', scope=formula(reg_FLV_CRU), trace=0)
+
+#SUCO.DE.FRUTA
+
+reg_SUCO.DE.FRUTA <- glm.nb(SUCO.DE.FRUTA ~ IA + SEXO + IDADE + ESTRATO.GEOGRAFICO + PESSOAS.NO.DOMICILIO + RENDA.PER.CAPITA + ALVENARIA + luz.eletrica + agua.canalisada + mesma.casa.antes.rompimento + mudança.status.moradia + plantio + animais,
+             data = roberta.brumadinho.semNA)
+
+reg_SUCO.DE.FRUTA <- step(reg_SUCO.DE.FRUTA, direction='backward', scope=formula(reg_SUCO.DE.FRUTA), trace=0)
+
+#FEIJÃO
+
+reg_FEIJÃO <- glm(FEIJÃO ~ IA + SEXO + IDADE + ESTRATO.GEOGRAFICO + PESSOAS.NO.DOMICILIO + RENDA.PER.CAPITA + ALVENARIA + luz.eletrica + agua.canalisada + mesma.casa.antes.rompimento + mudança.status.moradia + plantio + animais,
+                  family = 'poisson',
+                  data = roberta.brumadinho.semNA)
+
+reg_FEIJÃO <- step(reg_FEIJÃO, direction='backward', scope=formula(reg_FEIJÃO), trace=0)
+
+#CARNE.VERMELHA
+
+reg_CARNE.VERMELHA <- glm(CARNE.VERMELHA ~ IA + SEXO + IDADE + ESTRATO.GEOGRAFICO + PESSOAS.NO.DOMICILIO + RENDA.PER.CAPITA + ALVENARIA + luz.eletrica + agua.canalisada + mesma.casa.antes.rompimento + mudança.status.moradia + plantio + animais,
+                          family = 'poisson',
+                          data = roberta.brumadinho.semNA)
+
+reg_CARNE.VERMELHA <- step(reg_CARNE.VERMELHA, direction='backward', scope=formula(reg_CARNE.VERMELHA), trace=0)
+
+#FRANGO.GALINHA
+
+reg_FRANGO.GALINHA <- glm(FRANGO.GALINHA ~ IA + SEXO + IDADE + ESTRATO.GEOGRAFICO + PESSOAS.NO.DOMICILIO + RENDA.PER.CAPITA + ALVENARIA + luz.eletrica + agua.canalisada + mesma.casa.antes.rompimento + mudança.status.moradia + plantio + animais,
+              family = 'poisson',
+             data = roberta.brumadinho.semNA)
+
+
+reg_FRANGO.GALINHA <- step(reg_FRANGO.GALINHA, direction='backward', scope=formula(reg_FRANGO.GALINHA), trace=0)
+
+#REFRIGERANTE.SUCO.ARTIFICIAL
+
+reg_REFRIGERANTE.SUCO.ARTIFICIAL <- glm.nb(REFRIGERANTE.SUCO.ARTIFICIAL ~ IA + SEXO + IDADE + ESTRATO.GEOGRAFICO + PESSOAS.NO.DOMICILIO + RENDA.PER.CAPITA + ALVENARIA + luz.eletrica + agua.canalisada + mesma.casa.antes.rompimento + mudança.status.moradia + plantio + animais,
+             data = roberta.brumadinho.semNA)
+
+reg_REFRIGERANTE.SUCO.ARTIFICIAL <- step(reg_REFRIGERANTE.SUCO.ARTIFICIAL, direction='backward', scope=formula(reg_REFRIGERANTE.SUCO.ARTIFICIAL), trace=0)
+
+#PEIXE
+
+reg_PEIXE <- glm.nb(PEIXE ~ IA + SEXO + IDADE + ESTRATO.GEOGRAFICO + PESSOAS.NO.DOMICILIO + RENDA.PER.CAPITA + ALVENARIA + luz.eletrica + agua.canalisada + mesma.casa.antes.rompimento + mudança.status.moradia + plantio + animais,
+             data = roberta.brumadinho.semNA)
+
+reg_PEIXE <- step(reg_PEIXE, direction='backward', scope=formula(reg_PEIXE), trace=0)
+
+#LEITE
+
+reg_LEITE <- glm.nb(LEITE ~ IA + SEXO + IDADE + ESTRATO.GEOGRAFICO + PESSOAS.NO.DOMICILIO + RENDA.PER.CAPITA + ALVENARIA + luz.eletrica + agua.canalisada + mesma.casa.antes.rompimento + mudança.status.moradia + plantio + animais,
+             data = roberta.brumadinho.semNA)
+
+reg_LEITE <- step(reg_LEITE, direction='backward', scope=formula(reg_LEITE), trace=0)
+
+#DOCES
+
+reg_DOCES <- glm.nb(DOCES ~ IA + SEXO + IDADE + ESTRATO.GEOGRAFICO + PESSOAS.NO.DOMICILIO + RENDA.PER.CAPITA + ALVENARIA + luz.eletrica + agua.canalisada + mesma.casa.antes.rompimento + mudança.status.moradia + plantio + animais,
+             data = roberta.brumadinho.semNA)
+
+reg_DOCES <- step(reg_DOCES, direction='backward', scope=formula(reg_DOCES), trace=0)
+
+```
+
+```{r include=FALSE}
+
+#construcao das tabelas individuais e da tabela com os coeficientes gerais
+
+# Get the summary of the regression
+summary_result <- summary(reg_FRUTAS)
+
+# Extract coefficient estimates and p-values
+coef_estimates <- summary_result$coef[, "Estimate"]
+p_values <- summary_result$coef[, "Pr(>|z|)"]
+
+# Create a data frame for the coefficients and p-values
+coefficients_table_FRUTAS <- data.frame(
+  Coefficient = names(coef_estimates),
+  Exp_Coeficientes_FRUTAS = round(exp(coef_estimates),4),
+  P_Valor_FRUTAS = round(p_values,4)
+)
+
+#Selecionando apenas as variaveis significativas com alpha = 0.1
+
+coefficients_table_FRUTAS <- subset(coefficients_table_FRUTAS,
+                                    coefficients_table_FRUTAS$P_Valor_FRUTAS < 0.1)
+
+# Get the summary of the regression
+summary_result <- summary(reg_FLV_COZIDO)
+
+# Extract coefficient estimates and p-values
+coef_estimates <- summary_result$coef[, "Estimate"]
+p_values <- summary_result$coef[, "Pr(>|z|)"]
+
+# Create a data frame for the coefficients and p-values
+coefficients_table_FLV_COZIDO <- data.frame(
+  Coefficient = names(coef_estimates),
+  Exp_Coeficientes_FLV_COZIDO = round(exp(coef_estimates),4),
+  P_Valor_FLV_COZIDO = round(p_values,4)
+)
+
+#Selecionando apenas as variaveis significativas com alpha = 0.1
+
+coefficients_table_FLV_COZIDO <- subset(coefficients_table_FLV_COZIDO,
+                                        coefficients_table_FLV_COZIDO$P_Valor_FLV_COZIDO < 0.1)
+
+# Get the summary of the regression
+summary_result <- summary(reg_FLV_CRU)
+
+# Extract coefficient estimates and p-values
+coef_estimates <- summary_result$coef[, "Estimate"]
+p_values <- summary_result$coef[, "Pr(>|z|)"]
+
+# Create a data frame for the coefficients and p-values
+coefficients_table_FLV_CRU <- data.frame(
+  Coefficient = names(coef_estimates),
+  Exp_Coeficientes_FLV_CRU = round(exp(coef_estimates),4),
+  P_Valor_FLV_CRU = round(p_values,4)
+)
+
+#Selecionando apenas as variaveis significativas com alpha = 0.1
+
+coefficients_table_FLV_CRU <- subset(coefficients_table_FLV_CRU,
+                                        coefficients_table_FLV_CRU$P_Valor_FLV_CRU < 0.1)
+
+# Get the summary of the regression
+summary_result <- summary(reg_SUCO.DE.FRUTA)
+
+# Extract coefficient estimates and p-values
+coef_estimates <- summary_result$coef[, "Estimate"]
+p_values <- summary_result$coef[, "Pr(>|z|)"]
+
+# Create a data frame for the coefficients and p-values
+coefficients_table_SUCO.DE.FRUTA <- data.frame(
+  Coefficient = names(coef_estimates),
+  Exp_Coeficientes_SUCO.DE.FRUTA = round(exp(coef_estimates),4),
+  P_Valor_SUCO.DE.FRUTA = round(p_values,4)
+)
+
+#Selecionando apenas as variaveis significativas com alpha = 0.1
+
+coefficients_table_SUCO.DE.FRUTA <- subset(coefficients_table_SUCO.DE.FRUTA,
+                                        coefficients_table_SUCO.DE.FRUTA$P_Valor_SUCO.DE.FRUTA < 0.1)
+
+# Get the summary of the regression
+summary_result <- summary(reg_CARNE.VERMELHA)
+
+# Extract coefficient estimates and p-values
+coef_estimates <- summary_result$coef[, "Estimate"]
+p_values <- summary_result$coef[, "Pr(>|z|)"]
+
+# Create a data frame for the coefficients and p-values
+coefficients_table_CARNE.VERMELHA <- data.frame(
+  Coefficient = names(coef_estimates),
+  Exp_Coeficientes_CARNE.VERMELHA = round(exp(coef_estimates),4),
+  P_Valor_CARNE.VERMELHA = round(p_values,4)
+)
+
+#Selecionando apenas as variaveis significativas com alpha = 0.1
+
+coefficients_table_CARNE.VERMELHA <- subset(coefficients_table_CARNE.VERMELHA,
+                                        coefficients_table_CARNE.VERMELHA$P_Valor_CARNE.VERMELHA < 0.1)
+
+# Get the summary of the regression
+summary_result <- summary(reg_DOCES)
+
+# Extract coefficient estimates and p-values
+coef_estimates <- summary_result$coef[, "Estimate"]
+p_values <- summary_result$coef[, "Pr(>|z|)"]
+
+# Create a data frame for the coefficients and p-values
+coefficients_table_DOCES <- data.frame(
+  Coefficient = names(coef_estimates),
+  Exp_Coeficientes_DOCES = round(exp(coef_estimates),4),
+  P_Valor_DOCES = round(p_values,4)
+)
+
+#Selecionando apenas as variaveis significativas com alpha = 0.1
+
+coefficients_table_DOCES <- subset(coefficients_table_DOCES,
+                                        coefficients_table_DOCES$P_Valor_DOCES < 0.1)
+
+# Get the summary of the regression
+summary_result <- summary(reg_FEIJÃO)
+
+# Extract coefficient estimates and p-values
+coef_estimates <- summary_result$coef[, "Estimate"]
+p_values <- summary_result$coef[, "Pr(>|z|)"]
+
+# Create a data frame for the coefficients and p-values
+coefficients_table_FEIJÃO <- data.frame(
+  Coefficient = names(coef_estimates),
+  Exp_Coeficientes_FEIJÃO = round(exp(coef_estimates),4),
+  P_Valor_FEIJÃO = round(p_values,4)
+)
+
+#Selecionando apenas as variaveis significativas com alpha = 0.1
+
+coefficients_table_FEIJÃO <- subset(coefficients_table_FEIJÃO,
+                                        coefficients_table_FEIJÃO$P_Valor_FEIJÃO < 0.1)
+
+# Get the summary of the regression
+summary_result <- summary(reg_FRANGO.GALINHA)
+
+# Extract coefficient estimates and p-values
+coef_estimates <- summary_result$coef[, "Estimate"]
+p_values <- summary_result$coef[, "Pr(>|z|)"]
+
+# Create a data frame for the coefficients and p-values
+coefficients_table_FRANGO.GALINHA <- data.frame(
+  Coefficient = names(coef_estimates),
+  Exp_Coeficientes_FRANGO.GALINHA = round(exp(coef_estimates),4),
+  P_Valor_FRANGO.GALINHA = round(p_values,4)
+)
+
+#Selecionando apenas as variaveis significativas com alpha = 0.1
+
+coefficients_table_FRANGO.GALINHA <- subset(coefficients_table_FRANGO.GALINHA,
+                                        coefficients_table_FRANGO.GALINHA$P_Valor_FRANGO.GALINHA < 0.1)
+
+# Get the summary of the regression
+summary_result <- summary(reg_LEITE)
+
+# Extract coefficient estimates and p-values
+coef_estimates <- summary_result$coef[, "Estimate"]
+p_values <- summary_result$coef[, "Pr(>|z|)"]
+
+# Create a data frame for the coefficients and p-values
+coefficients_table_LEITE <- data.frame(
+  Coefficient = names(coef_estimates),
+  Exp_Coeficientes_LEITE = round(exp(coef_estimates),4),
+  P_Valor_LEITE = round(p_values,4)
+)
+
+#Selecionando apenas as variaveis significativas com alpha = 0.1
+
+coefficients_table_LEITE <- subset(coefficients_table_LEITE,
+                                        coefficients_table_LEITE$P_Valor_LEITE < 0.1)
+
+# Get the summary of the regression
+summary_result <- summary(reg_PEIXE)
+
+# Extract coefficient estimates and p-values
+coef_estimates <- summary_result$coef[, "Estimate"]
+p_values <- summary_result$coef[, "Pr(>|z|)"]
+
+# Create a data frame for the coefficients and p-values
+coefficients_table_PEIXE <- data.frame(
+  Coefficient = names(coef_estimates),
+  Exp_Coeficientes_PEIXE = round(exp(coef_estimates),4),
+  P_Valor_PEIXE = round(p_values,4)
+)
+
+#Selecionando apenas as variaveis significativas com alpha = 0.1
+
+coefficients_table_PEIXE <- subset(coefficients_table_PEIXE,
+                                        coefficients_table_PEIXE$P_Valor_PEIXE < 0.1)
+
+# Get the summary of the regression
+summary_result <- summary(reg_REFRIGERANTE.SUCO.ARTIFICIAL)
+
+# Extract coefficient estimates and p-values
+coef_estimates <- summary_result$coef[, "Estimate"]
+p_values <- summary_result$coef[, "Pr(>|z|)"]
+
+# Create a data frame for the coefficients and p-values
+coefficients_table_REFRIGERANTE.SUCO.ARTIFICIAL <- data.frame(
+  Coefficient = names(coef_estimates),
+  Exp_Coeficientes_REFRIGERANTE.SUCO.ARTIFICIAL = round(exp(coef_estimates),4),
+  P_Valor_REFRIGERANTE.SUCO.ARTIFICIAL = round(p_values,4)
+)
+
+#Selecionando apenas as variaveis significativas com alpha = 0.1
+
+coefficients_table_REFRIGERANTE.SUCO.ARTIFICIAL <- subset(coefficients_table_REFRIGERANTE.SUCO.ARTIFICIAL,
+                                        coefficients_table_REFRIGERANTE.SUCO.ARTIFICIAL$P_Valor_REFRIGERANTE.SUCO.ARTIFICIAL < 0.1)
+
+# Get the summary of the regression
+summary_result <- summary(reg_SUCO.DE.FRUTA)
+
+# Extract coefficient estimates and p-values
+coef_estimates <- summary_result$coef[, "Estimate"]
+p_values <- summary_result$coef[, "Pr(>|z|)"]
+
+# Create a data frame for the coefficients and p-values
+coefficients_table_SUCO.DE.FRUTA <- data.frame(
+  Coefficient = names(coef_estimates),
+  Exp_Coeficientes_SUCO.DE.FRUTA = round(exp(coef_estimates),4),
+  P_Valor_SUCO.DE.FRUTA = round(p_values,4)
+)
+
+#Selecionando apenas as variaveis significativas com alpha = 0.1
+
+coefficients_table_SUCO.DE.FRUTA <- subset(coefficients_table_SUCO.DE.FRUTA,
+                                        coefficients_table_SUCO.DE.FRUTA$P_Valor_SUCO.DE.FRUTA < 0.1)
+
+###### TABELONA COM TODOS OS RESULTADOS AGREGADOS #######
+
+
+combined_table <- merge(coefficients_table_FRUTAS[-3],
+                        coefficients_table_CARNE.VERMELHA[-3],
+                        by = "Coefficient",
+                        all = TRUE
+                        )
+
+combined_table <- merge(combined_table,
+                        coefficients_table_DOCES[-3],
+                        by = "Coefficient",
+                        all = TRUE
+                        )
+
+combined_table <- merge(combined_table,
+                        coefficients_table_FEIJÃO[-3],
+                        by = "Coefficient",
+                        all = TRUE
+                        )
+
+combined_table <- merge(combined_table,
+                        coefficients_table_FLV_COZIDO[-3],
+                        by = "Coefficient",
+                        all = TRUE
+                        )
+
+combined_table <- merge(combined_table,
+                        coefficients_table_FLV_CRU[-3],
+                        by = "Coefficient",
+                        all = TRUE
+                        )
+
+combined_table <- merge(combined_table,
+                        coefficients_table_FRANGO.GALINHA[-3],
+                        by = "Coefficient",
+                        all = TRUE
+                        )
+
+combined_table <- merge(combined_table,
+                        coefficients_table_LEITE[-3],
+                        by = "Coefficient",
+                        all = TRUE
+                        )
+
+combined_table <- merge(combined_table,
+                        coefficients_table_PEIXE[-3],
+                        by = "Coefficient",
+                        all = TRUE
+                        )
+
+combined_table <- merge(combined_table,
+                        coefficients_table_REFRIGERANTE.SUCO.ARTIFICIAL[-3],
+                        by = "Coefficient",
+                        all = TRUE
+                        )
+
+combined_table <- merge(combined_table,
+                        coefficients_table_SUCO.DE.FRUTA[-3],
+                        by = "Coefficient",
+                        all = TRUE
+                        )
+
+combined_table[is.na(combined_table)] <- '--'
+
+
+```
+
+
+<div style="text-align: justify">  
+A análise de regressão é uma ferramenta estatística que nos permite explorar as relações entre variáveis, identificar fatores significativos e quantificar o impacto desses fatores em uma variável de interesse. Com base no modelo que melhor se adequava em cada uma das variaveis de consumo, foram utilizadas duas classes de distribuições para nossas regressões, a binomial-negativa e a poisson.
+
+
+Após a construção dos modelos foram feitas tabelas que facilitam o entendimento da relação entre as variáveis. As tabelas que seguem abaixo é mostrado as variáveis explicativas significativas (alpha < 0.1), com seu respectivo p-valor e seu coeficiente. Para facilitar o entendimento do efeito da variável, a tabela mostra o exp(coeficiente), de forma que:<br>
+
+
+- Se exp(coeficiente) for igual a 1, não há efeito da variável explicativa na variável de interesse.
+- Se exp(coeficiente) for maior que 1, a variável explicativa tem um efeito positivo na variável de interesse.
+- Se exp(coeficiente) for menor que 1, a variável explicativa tem um efeito negativo na variável de interesse.
+
+ 
+Por exemplo, se exp(coeficiente) = 1.5, a variável explicativa em questão tem um efeito positivo de 1.5x (50%) na variável de interesse.
+
+
+Essa abordagem permite a compreensão de forma mais intuitiva como as variáveis explicativas estão relacionadas à variável de interesse.
+<div/>
+
+
+
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, paged.print=FALSE}
+coefficients_table_CARNE.VERMELHA <- as.tibble(coefficients_table_CARNE.VERMELHA)[-1,]
+colnames(coefficients_table_CARNE.VERMELHA) <- c("Variável explicativa", "exp(coeficiente)", "p-valor")
+
+kable(coefficients_table_CARNE.VERMELHA,
+      caption = 'Regressão para variável resposta Carne carne vermelha')
+```
+
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, paged.print=FALSE}
+coefficients_table_DOCES <- as.tibble(coefficients_table_DOCES)[-1,]
+colnames(coefficients_table_DOCES) <- c("Variável explicativa", "exp(coeficiente)", "p-valor")
+
+kable(coefficients_table_DOCES,
+      caption = 'Regressão para variável resposta Doces')
+```
+
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, paged.print=FALSE}
+coefficients_table_FRUTAS <- as.tibble(coefficients_table_FRUTAS)[-1,]
+colnames(coefficients_table_FRUTAS) <- c("Variável explicativa", "exp(coeficiente)", "p-valor")
+
+kable(coefficients_table_FRUTAS,
+      caption = 'Regressão para variável resposta Frutas')
+
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, paged.print=FALSE}
+coefficients_table_FEIJÃO <- as.tibble(coefficients_table_FEIJÃO)[-1,]
+colnames(coefficients_table_FEIJÃO) <- c("Variável explicativa", "exp(coeficiente)", "p-valor")
+
+kable(coefficients_table_FEIJÃO,
+      caption = 'Regressão para variável resposta Feijão')
+```
+
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, paged.print=FALSE}
+coefficients_table_FLV_COZIDO <- as.tibble(coefficients_table_FLV_COZIDO)[-1,]
+colnames(coefficients_table_FLV_COZIDO) <- c("Variável explicativa", "exp(coeficiente)", "p-valor")
+
+kable(coefficients_table_FLV_COZIDO,
+      caption = 'Regressão para variável resposta FLV Cozido')
+```
+
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, paged.print=FALSE}
+coefficients_table_FLV_CRU <- as.tibble(coefficients_table_FLV_CRU)[-1,]
+colnames(coefficients_table_FLV_CRU) <- c("Variável explicativa", "exp(coeficiente)", "p-valor")
+
+kable(coefficients_table_FLV_CRU,
+      caption = 'Regressão para variável resposta FLV Cru')
+```
+
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, paged.print=FALSE}
+coefficients_table_FRANGO.GALINHA <- as.tibble(coefficients_table_FRANGO.GALINHA)[-1,]
+colnames(coefficients_table_FRANGO.GALINHA) <- c("Variável explicativa", "exp(coeficiente)", "p-valor")
+
+kable(coefficients_table_FRANGO.GALINHA,
+      caption = 'Regressão para variável resposta Frango galinha')
+```
+
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, paged.print=FALSE}
+coefficients_table_LEITE <- as.tibble(coefficients_table_LEITE)[-1,]
+colnames(coefficients_table_LEITE) <- c("Variável explicativa", "exp(coeficiente)", "p-valor")
+
+kable(coefficients_table_LEITE,
+      caption = 'Regressão para variável resposta Leite')
+```
+
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, paged.print=FALSE}
+coefficients_table_PEIXE <- as.tibble(coefficients_table_PEIXE)[-1,]
+colnames(coefficients_table_PEIXE) <- c("Variável explicativa", "exp(coeficiente)", "p-valor")
+
+kable(coefficients_table_PEIXE,
+      caption = 'Regressão para variável resposta Peixe')
+```
+
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, paged.print=FALSE}
+coefficients_table_REFRIGERANTE.SUCO.ARTIFICIAL <- as.tibble(coefficients_table_REFRIGERANTE.SUCO.ARTIFICIAL)[-1,]
+colnames(coefficients_table_REFRIGERANTE.SUCO.ARTIFICIAL) <- c("Variável explicativa", "exp(coeficiente)", "p-valor")
+
+kable(coefficients_table_REFRIGERANTE.SUCO.ARTIFICIAL,
+      caption = 'Regressão para variável resposta Refrigerante ou suco artificial')
+```
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, paged.print=FALSE}
+coefficients_table_SUCO.DE.FRUTA <- as.tibble(coefficients_table_SUCO.DE.FRUTA)[-1,]
+colnames(coefficients_table_SUCO.DE.FRUTA) <- c("Variável explicativa", "exp(coeficiente)", "p-valor")
+
+kable(coefficients_table_SUCO.DE.FRUTA,
+      caption = 'Regressão para variável resposta Suco de fruta')
+```
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, paged.print=FALSE}
+combined_table <- as.tibble(combined_table[-1,])
+colnames(combined_table) <- c("Variável explicativa","Fruta", "Carne Vermelha", "Doce",
+                              "Feijão", "FLV Cozido", "FLV cru", "Frango galinha",
+                              "Leite", "Peixe", "Refrig./Suco artificial", "Suco fruta")
+
+kable(combined_table,
+      caption = 'Resumo, com os coeficientes de todas as variáveis de interesse e suas respectivas variáveis explicativas') 
+
+```
+ 
+\newpage
+# 4. Conclusão
+
+<div style="text-align: justify">
+
+O estudo realizado desempenha um papel crucial na compreensão dos impactos do rompimento da barragem em Brumadinho, sobre a segurança alimentar da população local. Ao analisar o consumo alimentar em relação à insegurança alimentar e ao levar em consideração fatores sociodemográficos e de saúde, este estudo fornece insights valiosos sobre a situação das pessoas afetadas pelo desastre.
+
+Os resultados desta pesquisa têm implicações significativas para a formulação de políticas públicas e a implementação de programas de apoio às comunidades que enfrentam desastres ambientais semelhantes. Ao compreender como a insegurança alimentar se relaciona com o consumo de alimentos, os responsáveis por políticas podem entender melhor a questão e desenvolver estratégias mais eficazes para solucionar o problema.
+
+Além disso, a abordagem metodológica empregada, oferece um modelo para futuras pesquisas nessa área, facilitando o desenvolvimento de políticas que visam a melhoria da qualidade de vida de comunidades impactadas por desastres ambientais.
+
+<div/>
+

@@ -1,0 +1,126 @@
+---
+title: "Exercício 6"
+author: "Isabelle Fernandes"
+date: "20-11-2023"
+output: pdf_document
+editor_options: 
+  chunk_output_type: console
+---
+
+## Letra a
+
+```{r}
+library(tidyverse)
+
+serie <- scan('celg.txt')
+energia <- scan('celg.txt') %>% 
+  ts(start=1980,frequency=12)
+
+plot(energia)
+```
+
+A série apresenta uma sazonalidade (ela fica mais evidente no meio para o final da série), apresenta uma tendência crescente, nível e ruído.\
+
+## Letra b
+
+```{r}
+#retirar as últimas 6 observações
+ajuste <- energia[-c(177:182)] %>% 
+  ts(start=1980,frequency=12)
+
+
+ModAdi<-HoltWinters(ajuste, alpha = NULL, beta = NULL, gamma = NULL, seasonal = c("additive"))
+
+ModAdi
+```
+
+As constantes possuem os seguintes valores:
+alpha = 0.3781187
+beta = 0
+gamma = 0.5586398
+
+## Letra c
+
+```{r}
+ajuste2 <- ajuste %>% 
+  ts(start=1980,frequency=12)
+
+
+ModMult <- HoltWinters(ajuste2, alpha = NULL, beta = NULL, gamma = NULL, seasonal = c("multiplicative"))
+
+ModMult
+
+```
+
+As constantes possuem os seguintes valores:
+alpha = 0.4381982
+beta = 0
+gamma = 0.3516627
+
+## Letra d
+
+```{r}
+c(ModAdi$SSE,ModMult$SSE)
+```
+
+O melhor modelo é o Multiplicativo, pois possui menor soma de quadrado dos erros.
+
+## Letra e
+
+```{r}
+a <- ModMult$alpha[[1]]
+b <- ModMult$beta[[1]]
+g <- ModMult$gamma[[1]]
+
+yt <- ajuste2[length(ajuste2)-1]
+
+x <- ModMult$fit
+
+#pegar a penúltima linha
+
+penultima <- nrow(ModMult$fit) - 1 
+
+linhaantep <- ModMult$fitted[penultima-1,]
+linhape <- ModMult$fitted[penultima,]
+linhault <-  ModMult$fitted[penultima+1,]
+
+nivel <- a*(yt/linhape[4]) + (1-a)*(linhaantep[2]+linhaantep[3])
+tend <- b*(yt-linhaantep[2]) + (1-b)* linhaantep[3] 
+sas <- g*(yt/linhaantep[2]) + (1-g)*linhape[4]
+
+cat("Nível = ", nivel, 
+    "\nTendência = ", tend,
+    "\nSazonalidade =", sas)
+
+```
+
+## Letra f
+
+```{r}
+
+previsao = predict(ModMult, n.ahead=6, prediction.interval = TRUE, level = 0.95, interval="prediction") 
+
+h <- 6
+n=length(serie)-h
+
+serie_pre <- serie[(n+1):(n+h)] 
+previsao
+
+
+```
+
+Previsão para k = 1,2,3,4,5,6
+k = 1 Está no intervalo
+k = 2 Não está no intervalo
+k = 3 Está no intervalo
+k = 4 Está no intervalo
+k = 5 Está no intervalo
+k = 6 Está no intervalo
+
+
+## Letra g
+
+```{r}
+plot(ModMult, previsao, lwd=2, col="black", xlab="Ano", ylab=NA)
+```
+
